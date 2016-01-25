@@ -33,7 +33,7 @@ public class Start {
 		
 		int doc_id = 0;
 		String docText = null;
-		Vector<Document> docs = new Vector<Document>();
+		Vector<Document> documents = new Vector<Document>();
 		
 		Engine engine = new Engine(_modelTokenIO, _modelPosIO);
 		
@@ -41,24 +41,24 @@ public class Start {
 		while ((docText = br.readLine())!=null) {
 			// Split each "document" into sentences.
 			String[] sentText = engine.parseDocument(docText,Engine.LINE_SEPERATOR);
-			Vector<Sentence> sents = new Vector<Sentence>();
-			// Tokenize each line
-			for (int sent_id=0; sent_id < sentText.length; sent_id++) {
+			Vector<Sentence> sentences = new Vector<Sentence>();
+			Document doc;
 
+			for (int sent_id=0; sent_id < sentText.length; sent_id++) {
+				// Tokenize each line
 				String[] words = engine.tokenize(sentText[sent_id]);
-				
-				
-				
 				
 				// POS Tag each line
 				String[] tags = engine.tagPOS(words);
 				
-				
+				// Create Sentence instance
+				Sentence sent = new Sentence(sent_id,sentText[sent_id],words,tags);
+				sentences.add(sent);
 			}
 			
-			
 			// Create document instance and add to vector of Documents. 
-			//docs.add(new Document(doc_id,bigLine));
+			doc = new Document(doc_id, sentences);
+			documents.add(doc);
 			doc_id++;	// Increment Doc index.
 		}
 		
@@ -67,36 +67,12 @@ public class Start {
 		_modelTokenIO.close();
 		_modelPosIO.close();
 		_sourceIO.close();
-		
-	}
 
-/*
-	public static void breakSentense() {
-		InputStream in = null;
-		try {
-			in = new FileInputStream("en-sent.bin");
-			SentenceModel model = new SentenceModel(in);
-			SentenceDetectorME detector = new SentenceDetectorME(model);
-			String sentences[] = detector.sentDetect("Hello! This is a sentense.");
-			
-			for (int i=0; i<sentences.length; i++) {
-				System.out.println(sentences[i]);
-			}
-			
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException ioe) {
-					
-				}
-			}			
+		Iterator<Document> dit = documents.iterator();
+		while (dit.hasNext()) {
+			System.out.println(dit.next().toString());
 		}
-
 	}
-	*/
-	
+
 
 }
