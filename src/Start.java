@@ -1,5 +1,4 @@
 
-//import java.io.FileInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,12 +8,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
-
-import opennlp.tools.tokenize.Tokenizer;
-import opennlp.tools.tokenize.TokenizerME;
-import opennlp.tools.tokenize.TokenizerModel;
-
-//import opennlp.tools.sentdetect.*;
 
 public class Start {
 
@@ -29,13 +22,14 @@ public class Start {
 		InputStream _sourceIO = Start.class.getResourceAsStream(_config.getProperty("file.data"));
 		InputStream _modelTokenIO = Start.class.getResourceAsStream(_config.getProperty("file.model.token"));
 		InputStream _modelPosIO = Start.class.getResourceAsStream(_config.getProperty("file.model.pos"));
+		InputStream _modelChunkerIO = Start.class.getResourceAsStream(_config.getProperty("file.model.chunker"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(_sourceIO));
 		
 		int doc_id = 0;
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();
 		
-		Engine engine = new Engine(_modelTokenIO, _modelPosIO);
+		Engine engine = new Engine(_modelTokenIO, _modelPosIO, _modelChunkerIO);
 		
 		
 		while ((docText = br.readLine())!=null) {
@@ -49,10 +43,14 @@ public class Start {
 				String[] words = engine.tokenize(sentText[sent_id]);
 				
 				// POS Tag each line
-				String[] tags = engine.tagPOS(words);
+				String[] tags = engine.tagging(words);
+				
+				// Chunking tokens bad on tags
+				String[] chunks = engine.chunkify(words, tags);
 				
 				// Create Sentence instance
-				Sentence sent = new Sentence(sent_id,sentText[sent_id],words,tags);
+				Sentence sent = new Sentence(sent_id, sentText[sent_id], chunks);
+				
 				sentences.add(sent);
 			}
 			
@@ -66,12 +64,18 @@ public class Start {
 		fileIO.close();
 		_modelTokenIO.close();
 		_modelPosIO.close();
+		_modelChunkerIO.close();
 		_sourceIO.close();
 
+		
+		// ############
 		Iterator<Document> dit = documents.iterator();
 		while (dit.hasNext()) {
 			System.out.println(dit.next().toString());
 		}
+		// #############
+		
+		
 	}
 
 

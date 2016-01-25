@@ -1,4 +1,7 @@
 import java.io.InputStream;
+
+import opennlp.tools.chunker.ChunkerME;
+import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.tokenize.Tokenizer;
@@ -13,14 +16,18 @@ public class Engine {
 	private Tokenizer _tokenizer;
 	private POSModel _modelPOS;
 	private POSTaggerME _tagger;
+	private ChunkerModel _modelChunk;
+	private ChunkerME _chunker;
 	
 	
-	public Engine (InputStream tokenIO, InputStream posIO) throws Exception{
+	public Engine (InputStream tokenIO, InputStream posIO, InputStream chunkerIO) throws Exception{
 		
 		this._modelToken = new TokenizerModel(tokenIO);
 		this._tokenizer = new TokenizerME(_modelToken);
 		this._modelPOS = new POSModel(posIO);
 		this._tagger = new POSTaggerME(_modelPOS);
+		this._modelChunk = new ChunkerModel(chunkerIO);
+		this._chunker = new ChunkerME(_modelChunk);
 		
 	}
 	
@@ -30,14 +37,20 @@ public class Engine {
 	}
 	
 	public String[] tokenize(String line) {
-		String tokens[] = _tokenizer.tokenize(line);
+		String[] tokens = _tokenizer.tokenize(line);
 		return tokens;
 	}
 	
-	public String[] tagPOS(String[] tokens) {
-		String tags[] = _tagger.tag(tokens);
+	public String[] tagging(String[] tokens) {
+		String[] tags = _tagger.tag(tokens);
 		return tags;
 	}
+	
+	public String[] chunkify(String[] words, String[] tags) {
+		String chunks[] = _chunker.chunk(words, tags);
+		return chunks;
+	}
+	
 	/*
 	public static String[] applyPOS(String[] tokens, InputStream modelIn) throws IOException {
 		

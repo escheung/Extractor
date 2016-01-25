@@ -15,9 +15,11 @@ public class Document {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Document (int id, Vector<Sentence> sents) {
 		_ID = id;
-		_Sentences = (Vector<Sentence>) sents.clone();	// a shallow copy.
+		_Sentences = (Vector<Sentence>) sents.clone();	// a shallow copy.	
+		
 	}
 	
 	public void process() {
@@ -27,7 +29,11 @@ public class Document {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("Document ID:%d: Sentences:%d", this._ID, _Sentences.size()));
+		sb.append(String.format("Document ID:%d: Sentences:%d\n", this._ID, _Sentences.size()));
+		Iterator<Sentence> sit = _Sentences.iterator();
+		while (sit.hasNext()){
+			sb.append(String.format("%s\n", sit.next().toString()));	
+		}
 		return sb.toString();
 	}
 	public int getID() {
