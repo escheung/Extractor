@@ -49,7 +49,7 @@ public class Start {
 				String[] chunks = engine.chunkify(words, tags);
 				
 				// Create Sentence instance
-				Sentence sent = new Sentence(sent_id, sentText[sent_id], chunks);
+				Sentence sent = new Sentence(sent_id, sentText[sent_id], words, tags, chunks);
 				
 				sentences.add(sent);
 			}
