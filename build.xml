@@ -60,4 +60,9 @@
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
+    <target name="TestTriple">
+        <java classname="TestTriple" failonerror="true" fork="yes">
+            <classpath refid="Extractor.classpath"/>
+        </java>
+    </target>
 </project>

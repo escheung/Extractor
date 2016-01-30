@@ -15,11 +15,14 @@ public class Document {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Document (int id, Vector<Sentence> sents) {
+	public Document (int id) {
+		// Constructor
 		_ID = id;
-		_Sentences = (Vector<Sentence>) sents.clone();	// a shallow copy.	
-		
+		_Sentences = new Vector<Sentence>();
+	}
+	
+	public boolean addSentence(Sentence sentence) {
+		return _Sentences.add(sentence);
 	}
 	
 	public void process() {

@@ -20,12 +20,12 @@ public class Sentence {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(_Text);
-		sb.append('\n');
+		sb.append('\n'+_Text+'\n');
+		sb.append("Words\n");
 		sb.append(Arrays.toString(_Words));
-		sb.append('\n');
+		sb.append("\nTags\n");
 		sb.append(Arrays.toString(_Tags));
-		sb.append('\n');
+		sb.append("\nChunks\n");
 		sb.append(Arrays.toString(_Chunks));
 		
 		return sb.toString();
