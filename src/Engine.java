@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Vector;
 
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
@@ -63,55 +64,42 @@ public class Engine {
 		return chunks;
 	}
 	public void parseChunking(String sentence) {
-		
+		if (sentence == null) return;
+		if (sentence.isEmpty()) return;
 		Parse topParses[] = ParserTool.parseLine(sentence, _parser, 1);
+	/*	
 		for (Parse p: topParses) {
 			p.show();
 		}
-		
+	*/
 	}
 	public void chunkifyAsSpan(String[] words, String[] tags) {
-		
 		Span[] chunks = _chunker.chunkAsSpans(words, tags);
-		System.out.println("chunks:");
-		for (Span ns : chunks) {
-			System.out.println(ns.toString());
-		}
 	}
 	
-	public void findPerson(String[] tokens) {
-		Span nameSpansPerson[] = _nameFinderPerson.find(tokens);
+	public String[] findPerson(String[] tokens) {
+		Span personSpan[] = _nameFinderPerson.find(tokens);
 		_nameFinderPerson.clearAdaptiveData();
-		System.out.println("######");
-		for (Span ns : nameSpansPerson) {
-			System.out.println(ns.toString());
-		}
+		return (Span.spansToStrings(personSpan, tokens));
 	}
 	
-	public void findLocation(String[] tokens) {
-		Span nameSpansLocation[] = _nameFinderLocation.find(tokens);
+	public String[] findLocation(String[] tokens) {
+		Span locSpans[] = _nameFinderLocation.find(tokens);
 		_nameFinderLocation.clearAdaptiveData();
-		for (Span ns : nameSpansLocation) {
-			System.out.println(ns.toString());
-		}
+		return (Span.spansToStrings(locSpans, tokens));
 	}
 	
-	public void findOrganization(String[] tokens) {
-		Span nameSpansOrganization[] = _nameFinderOrganization.find(tokens);
+	public String[] findOrganization(String[] tokens) {
+		Span orgSpans[] = _nameFinderOrganization.find(tokens);
 		_nameFinderOrganization.clearAdaptiveData();
-		for (Span ns : nameSpansOrganization) {
-			System.out.println(ns.toString());
-		}
+		return (Span.spansToStrings(orgSpans, tokens));
 	}
 	
-	public void findDate(String[] tokens) {
-		Span nameSpansDate[] = _nameFinderDate.find(tokens);
+	public String[] findDate(String[] tokens) {
+		Span dateSpans[] = _nameFinderDate.find(tokens);
 		_nameFinderDate.clearAdaptiveData();
-		for (Span ns : nameSpansDate) {
-			System.out.println(ns.toString());
-		}
+		return (Span.spansToStrings(dateSpans, tokens));
 	}
-	
 	
 	public static String[] applyPOS(String[] tokens, InputStream modelIn) throws IOException {
 		

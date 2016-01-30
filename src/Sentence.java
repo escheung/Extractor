@@ -27,10 +27,7 @@ public class Sentence {
 		sb.append(Arrays.toString(_Tags));
 		sb.append("\nChunks\n");
 		sb.append(Arrays.toString(_Chunks));
-		
 		return sb.toString();
-		//return new String(_ID+"|"+_Text);
-		
 	}
 	
 	public int getID() {

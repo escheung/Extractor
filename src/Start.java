@@ -34,6 +34,7 @@ public class Start {
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();
 		Engine engine = new Engine(_modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO, _modelNerDateIO);
+		TripleStore ts = new TripleStore();
 		
 		
 		while ((docText = br.readLine())!=null) {
@@ -56,11 +57,24 @@ public class Start {
 				engine.parseChunking(sentText[sent_id]);
 				
 				// Finding Base entities using NER
-				engine.findPerson(words);
-				engine.findOrganization(words);
-			//	engine.findLocation(words);
-			//	engine.findDate(words);
+				for (String p: engine.findPerson(words)) {
+					ts.addEntity(p);	// add entity to list.
+					ts.addTriple(p,TripleStore.IS_A,"person",doc_id);
+				}
 				
+				for (String o: engine.findOrganization(words)) {
+					ts.addEntity(o);	// add entity to list.
+					ts.addTriple(o,TripleStore.IS_A,"organization",doc_id);
+				}
+				
+				for (String l: engine.findLocation(words)) {
+					ts.addEntity(l);	// add entity to list.
+					ts.addTriple(l,TripleStore.IS_A,"location",doc_id);
+				}
+				for (String d: engine.findDate(words)) {
+					ts.addEntity(d);	// add entity to list.
+					ts.addTriple(d,TripleStore.IS_A,"date",doc_id);
+				}
 				
 				// Create Sentence instance
 				Sentence sent = new Sentence(sent_id, sentText[sent_id], words, tags, chunks);
@@ -87,12 +101,9 @@ public class Start {
 
 		
 		// ############
-	/*	
-		Iterator<Document> dit = documents.iterator();
-		while (dit.hasNext()) {
-			System.out.println(dit.next().toString());
-		}
-	*/
+		
+		System.out.println(ts.toString());
+
 		// #############
 		
 		

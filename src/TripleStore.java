@@ -1,13 +1,16 @@
 import java.util.Vector;
 
+// TripleStore is an object that store entities and the "triple" relationships between them.
+// It currently DOES NOT support duplicate entity names.
+
 public class TripleStore {
 
 	private Vector<Integer> _Subject;	// Subject of a Triple
 	private Vector<Integer> _Predicate;	// Predicate of a Triple
 	private Vector<Integer> _Object;	// Object of a Triple
-	private Vector<Integer> _Source;
-	private Vector<String> _Entity;
-	private int _TripleSize = 0;
+	private Vector<Integer> _Source;	// Origin document of the Triple
+	private Vector<String> _Entity;		// Entity names as Strings
+	private int _TripleSize = 0;		// Initial number of Triples.
 	
 	// Base Predicate ID
 	public static int IS_A = 1;
@@ -24,13 +27,15 @@ public class TripleStore {
 		_TripleSize = 0;
 		
 		// Add base entities
-		_Entity.add("Entity");
-		_Entity.add("Person");
-		_Entity.add("Organization");
-		_Entity.add("Location");
-		this.addTriple(getEntity("Person"),TripleStore.IS_A,getEntity("Entity"),-1);
-		this.addTriple(getEntity("Organization"),TripleStore.IS_A,getEntity("Entity"),-1);
-		this.addTriple(getEntity("Location"),TripleStore.IS_A,getEntity("Entity"),-1);
+		_Entity.add("entity");
+		_Entity.add("person");
+		_Entity.add("organization");
+		_Entity.add("location");
+		_Entity.add("date");
+		this.addTriple(getEntity("person"),TripleStore.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("organization"),TripleStore.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("location"),TripleStore.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("date"),TripleStore.IS_A,getEntity("entity"),-1);
 	}
 	
 	public int addEntity(String name) {
