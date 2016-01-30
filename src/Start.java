@@ -58,8 +58,8 @@ public class Start {
 				// Finding Base entities using NER
 				engine.findPerson(words);
 				engine.findOrganization(words);
-				engine.findLocation(words);
-				engine.findDate(words);
+			//	engine.findLocation(words);
+			//	engine.findDate(words);
 				
 				
 				// Create Sentence instance

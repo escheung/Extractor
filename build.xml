@@ -55,13 +55,14 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="Start">
-        <java classname="Start" failonerror="true" fork="yes">
+    <target name="test">
+        <java classname="test" failonerror="true" fork="yes">
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
-    <target name="TestTriple">
-        <java classname="TestTriple" failonerror="true" fork="yes">
+    <target name="Start">
+        <java classname="Start" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx2048m"/>
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
