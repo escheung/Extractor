@@ -13,9 +13,11 @@ public class TripleStore {
 	private int _TripleSize = 0;		// Initial number of Triples.
 	
 	// Base Predicate ID
+	/*
 	public static int IS_A = 1;
 	public static int PART_OF = 2;
 	public static int SAME_AS = 3;
+	*/
 	
 	public TripleStore () {
 		// Constructor
@@ -32,10 +34,10 @@ public class TripleStore {
 		_Entity.add("organization");
 		_Entity.add("location");
 		_Entity.add("date");
-		this.addTriple(getEntity("person"),TripleStore.IS_A,getEntity("entity"),-1);
-		this.addTriple(getEntity("organization"),TripleStore.IS_A,getEntity("entity"),-1);
-		this.addTriple(getEntity("location"),TripleStore.IS_A,getEntity("entity"),-1);
-		this.addTriple(getEntity("date"),TripleStore.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("person"),Triple.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("organization"),Triple.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("location"),Triple.IS_A,getEntity("entity"),-1);
+		this.addTriple(getEntity("date"),Triple.IS_A,getEntity("entity"),-1);
 	}
 	
 	public int addEntity(String name) {
@@ -61,7 +63,8 @@ public class TripleStore {
 	public void addTriple(int subject, int predicate, int object, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
 		// Add a triple
-		if (subject<0 || predicate<0 || object<0) return;
+		if (subject<0 || predicate<0 || object<0) return;		// not valid.
+		if (this.exists(subject, predicate, object)) return;	// already exists.
 		if (subject<_Entity.size() && object<_Entity.size()) {
 			_Subject.add(subject);
 			_Predicate.add(predicate);
@@ -70,6 +73,18 @@ public class TripleStore {
 			_TripleSize++;
 		};
 		
+	}
+	public boolean exists(int subject, int predicate, int object) {
+		// Check if the proposed triple already exists.
+		assert sanityCheck():"exists(): Failed sanity check.";
+		int i=0;
+		while (i<_TripleSize) {
+			if (_Subject.get(i)==subject && _Predicate.get(i)==predicate && _Object.get(i)==object) {
+				return true;				
+			}
+			i++;
+		}
+		return false;
 	}
 	public int getSize() {
 		if (sanityCheck()) return _Subject.size();

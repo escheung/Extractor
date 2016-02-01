@@ -13,9 +13,9 @@ public class TestTriple {
 		
 		sem.sanityCheck();
 		
-		sem.addTriple("Character",TripleStore.IS_A,"Thing1",0);
-		sem.addTriple("Character",TripleStore.IS_A,"Thing2",0);
-		sem.addTriple("Character",TripleStore.IS_A,"CatInAHat",0);
+		sem.addTriple("Character",Triple.IS_A,"Thing1",0);
+		sem.addTriple("Character",Triple.IS_A,"Thing2",0);
+		sem.addTriple("Character",Triple.IS_A,"CatInAHat",0);
 		
 		System.out.println("Printing...");
 		sem.sanityCheck();

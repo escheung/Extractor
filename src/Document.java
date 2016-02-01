@@ -28,6 +28,7 @@ public class Document {
 	public void process() {
 
 	}
+
 	
 	
 	public String toString() {
@@ -46,5 +47,12 @@ public class Document {
 		return _Sentences.size();
 	}
 	
-	
+	public static String preprocess(String text) {
+		String line;
+		// Replace the LINE_SEPERATOR with " "
+		line = text.replaceAll(Engine.LINE_SEPERATOR, " ");
+		// Remove items in round brackets;
+		line = line.replaceAll("\\(.*?\\)","");
+		return line;
+	}
 }

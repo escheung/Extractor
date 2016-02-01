@@ -13,6 +13,8 @@ import opennlp.tools.parser.ParserFactory;
 import opennlp.tools.parser.ParserModel;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.sentdetect.SentenceDetectorME;
+import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -22,6 +24,7 @@ public class Engine {
 
 	public final static String LINE_SEPERATOR = "\\\\n";
 	
+	private SentenceDetectorME _sentenceDetector;
 	private Tokenizer _tokenizer;
 	private POSTaggerME _tagger;
 	private ChunkerME _chunker;
@@ -32,8 +35,9 @@ public class Engine {
 	private NameFinderME _nameFinderOrganization;
 	private NameFinderME _nameFinderDate;
 
-	public Engine (InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO, InputStream nerDateIO) throws Exception{
+	public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO, InputStream nerDateIO) throws Exception{
 		
+		this._sentenceDetector = new SentenceDetectorME(new SentenceModel(sentIO));
 		this._tokenizer = new TokenizerME(new TokenizerModel(tokenIO));
 		this._tagger = new POSTaggerME(new POSModel(posIO));
 		this._chunker = new ChunkerME(new ChunkerModel(chunkerIO));
@@ -49,6 +53,11 @@ public class Engine {
 		return lines;
 	}
 	
+	public String[] splitSentence(String text) {
+		String[] sentences = _sentenceDetector.sentDetect(text);
+		return sentences;
+	}
+	
 	public String[] tokenize(String line) {
 		String[] tokens = _tokenizer.tokenize(line);
 		return tokens;
@@ -60,21 +69,36 @@ public class Engine {
 	}
 	
 	public String[] chunkify(String[] words, String[] tags) {
-		String chunks[] = _chunker.chunk(words, tags);
-		return chunks;
-	}
-	public void parseChunking(String sentence) {
-		if (sentence == null) return;
-		if (sentence.isEmpty()) return;
-		Parse topParses[] = ParserTool.parseLine(sentence, _parser, 1);
-	/*	
-		for (Parse p: topParses) {
-			p.show();
-		}
-	*/
-	}
-	public void chunkifyAsSpan(String[] words, String[] tags) {
 		Span[] chunks = _chunker.chunkAsSpans(words, tags);
+		return (Span.spansToStrings(chunks, words));
+	}
+	
+	public void parseToTree(String sentence) {
+		Parse topParses[] = ParserTool.parseLine(sentence, _parser, 1);
+		
+		for (Parse p0:topParses) {
+			StringBuffer sb0 = new StringBuffer();
+			p0.show(sb0);
+			System.out.println(" "+sb0);
+			System.out.println("#ofChildren"+p0.getChildCount());
+			for (Parse p1:p0.getChildren()) {
+				StringBuffer sb1 = new StringBuffer();
+				p1.show(sb1);
+				System.out.println(" "+sb1);
+				System.out.println(" "+p1.getCoveredText());
+				System.out.println(" #ofChildren"+p1.getChildCount());
+				for (Parse p2:p1.getChildren()) {
+					StringBuffer sb2 = new StringBuffer();
+					p2.show(sb2);	
+					System.out.println("  "+sb2);
+					System.out.println("  "+p2.getCoveredText());
+					System.out.println("  #ofChildren"+p2.getChildCount());
+					
+				}	
+			}
+			
+		}
+		
 	}
 	
 	public String[] findPerson(String[] tokens) {
