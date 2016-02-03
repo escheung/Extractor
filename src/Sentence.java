@@ -114,7 +114,7 @@ public class Sentence {
 					// found Noun;
 					object = object.concat(" "+words[index]);	// add word to object string.
 					state = 5;	// stay in state 5;
-				} else if (words[index].equals("or")) {
+				} else if (words[index].matches("^(or|and)$")) {
 					// found 'or'; flag to store triple.
 					found = true;
 					state = 6;
