@@ -1,3 +1,4 @@
+import java.util.Iterator;
 import java.util.Vector;
 
 // TripleStore is an object that store entities and the "triple" relationships between them.
@@ -52,14 +53,21 @@ public class TripleStore {
 		return _Entity.indexOf(name);
 	}
 	
+	public void addTriple(Triple triple, int source) {
+		assert sanityCheck():"Failed Sanity Check.";
+		if (triple == null) return;
+		int subject = addEntity(triple.getSubject());
+		int object = addEntity(triple.getObject());
+		addTriple(subject, triple.getPredicate(), object, source);
+	}
+	
 	public void addTriple(String subject_name, int predicate, String object_name, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
 		int subject = getEntity(subject_name);
 		int object = getEntity(object_name);
-		
 		addTriple(subject,predicate,object,source);
-		
 	}
+	
 	public void addTriple(int subject, int predicate, int object, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
 		// Add a triple
@@ -74,6 +82,15 @@ public class TripleStore {
 		};
 		
 	}
+	
+	public void addTriples(Vector<Triple> triples, int source) {
+		assert sanityCheck():"Failed Sanity Check.";
+		Iterator<Triple> it = triples.iterator();
+		while (it.hasNext()) {
+			addTriple(it.next(),source);
+		}
+	}
+	
 	public boolean exists(int subject, int predicate, int object) {
 		// Check if the proposed triple already exists.
 		assert sanityCheck():"exists(): Failed sanity check.";

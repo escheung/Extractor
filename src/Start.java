@@ -47,27 +47,27 @@ public class Start {
 			String[] sentText = engine.splitSentence(docText);
 			Document doc = new Document(doc_id);
 
-			//for (int sent_id=0; sent_id < sentText.length; sent_id++) {
-			for (int sent_id=0; sent_id < SentenceToProcess; sent_id++) {
+			for (int sent_id=0; sent_id < sentText.length; sent_id++) {
 				if (sentText[sent_id] == null) continue;
 				if (sentText[sent_id].isEmpty()) continue;
-				String line = sentText[sent_id];
+				String line = Sentence.stripStuffInCommas(sentText[sent_id]);
 				
 				// Tokenize each line
 				String[] words = engine.tokenize(line);
-				
 				// POS Tag each line
 				String[] tags = engine.tagging(words);
-/*				for (int i=0; i<words.length; i++) {
-					System.out.println(String.format("POS- %s\t%s", words[i],tags[i]));
-				}
-*/			
-				// Use FSM to find IS-A pattern and create triple.
-				Triple triple = Sentence.fsm_Is_A(words, tags);
-				if (triple != null) {
-					int s = ts.addEntity(triple.getSubject());
-					int o = ts.addEntity(triple.getObject());
-					ts.addTriple(s, Triple.IS_A, o, doc_id);
+				
+				if (sent_id==0) {
+					// First sentence in document; Look for Anchor Term.
+					// Use FSM to find basic Noun IS-A pattern.
+					
+					ts.addTriples(Sentence.fsm_Is_A(words, tags), doc_id);
+					
+				} else {
+					// Use FSM to detect Pronoun IS-A pattern.
+					// TODO: make FSM.
+					
+					
 				}
 				
 				// Finding Base entities using NER

@@ -12,7 +12,6 @@ public class Document {
 		// Constructor;
 		_ID = 0;
 		_Sentences = new Vector<Sentence>();
-		
 	}
 	
 	public Document (int id) {
@@ -21,6 +20,7 @@ public class Document {
 		_Sentences = new Vector<Sentence>();
 	}
 	
+
 	public boolean addSentence(Sentence sentence) {
 		return _Sentences.add(sentence);
 	}
