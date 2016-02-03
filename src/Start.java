@@ -46,11 +46,12 @@ public class Start {
 			// Split each Document into sentences using the special seperator and sentence model.
 			String[] sentText = engine.splitSentence(docText);
 			Document doc = new Document(doc_id);
-
+			String anchor = "";	// Anchor term for document; Usually first noun found.
+			
 			for (int sent_id=0; sent_id < sentText.length; sent_id++) {
 				if (sentText[sent_id] == null) continue;
 				if (sentText[sent_id].isEmpty()) continue;
-				String line = Sentence.stripStuffInCommas(sentText[sent_id]);
+				String line = Sentence.delStuffBtwCommas(sentText[sent_id]);
 				
 				// Tokenize each line
 				String[] words = engine.tokenize(line);
@@ -60,8 +61,16 @@ public class Start {
 				if (sent_id==0) {
 					// First sentence in document; Look for Anchor Term.
 					// Use FSM to find basic Noun IS-A pattern.
+					Triple triple = Sentence.fsm_Is_A(words, tags);
+					if (triple != null) {
+						ts.addTriple(triple, doc_id);
+						anchor = triple.getSubject();
+					}
+					// Process text between first set of commas.
+					String btwCommas = Sentence.getStuffBtwCommas(sentText[sent_id]);
 					
-					ts.addTriples(Sentence.fsm_Is_A(words, tags), doc_id);
+					System.out.println(btwCommas);
+					
 					
 				} else {
 					// Use FSM to detect Pronoun IS-A pattern.
