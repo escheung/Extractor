@@ -46,6 +46,59 @@ public class Sentence {
 		return "";
 	}
 	
+	public static Triple fsm_Plays_For(String[] words, String[] tags) {
+		// This FSM tries to find the Plays-For pattern.
+		Triple triple = null;
+		String subject = "";
+		int state = 0;	// state index.
+		int index = 0;	// word index in sentence.
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].matches("^plays|played$")) {
+					state = 1;	// found the word "plays"; go to state 1.
+				} else {
+					state = 0;	// otherwise; stays here.
+				}
+				break;
+			case 1:
+				if (words[index].equalsIgnoreCase("for")) {
+					state = 2;	// found the word "for"; go to state 2;
+				} else {
+					state = 4;
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*|JJ.*$")) {	// found a noun or adjective
+					subject = subject.concat(words[index]);	// add noun to object.
+					state = 3;	// go to state 3;
+				} else {
+					state = 4;	// unexpected word. go to state 4;
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*")) {
+					subject = subject.concat(" " + words[index]);	// add noun to object.
+					state = 3;	// found a noun, add to object;
+				} else {
+					state = 4;	// no more noun. go to state 4;
+				}
+				break;
+			default:
+				break;
+			}
+			
+			index++;
+		}
+		
+		if (!subject.isEmpty()) {
+			triple = new Triple(subject,Triple.IS_A,"football team");
+		}
+		
+		return triple;
+	}
+	
 	public static Vector<Triple> fsm_Known_As(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "Known-As" pattern.
 		Vector<Triple> triples = new Vector<Triple>();
@@ -168,6 +221,8 @@ public class Sentence {
 		
 		return triples;
 	}
+	
+
 	
 	public static Triple fsm_Is_A(String[] words, String[] tags) {
 		// This FSM tries to find the IS-A pattern.

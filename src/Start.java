@@ -75,14 +75,14 @@ public class Start {
 						String[] t = engine.tagging(w);
 						ts.addTriples(Sentence.fsm_Known_As(anchor,w,t),doc_id);
 					}
-					
-					
 				} else {
 					// Use FSM to detect Pronoun IS-A pattern.
 					// TODO: make FSM.
 					
-					
 				}
+				
+				// Finding football teams in "Plays/ed" for pattern
+				ts.addTriple(Sentence.fsm_Plays_For(words, tags),doc_id);
 				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {

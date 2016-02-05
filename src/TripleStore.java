@@ -126,8 +126,11 @@ public class TripleStore {
 	}
 	public boolean sanityCheck() {
 		// Sanity check of triple's size is consistent.
-		System.out.println(String.format("Entity:%d;\nTriple:%d;\nSubject:%d;\nPredicate:%d\nObject:%d\n",_Entity.size(),_TripleSize,_Subject.size(),_Predicate.size(),_Object.size()));
-		return (_TripleSize == _Subject.size() && _Subject.size() == _Predicate.size() && _Predicate.size() == _Object.size());
+		
+		return (_TripleSize == _Subject.size() && 
+			_Subject.size() == _Predicate.size() && 
+			_Predicate.size() == _Object.size() &&
+			_Entity.size() == _EntitySource.size());
 	}
 	
 	public String toString() {
