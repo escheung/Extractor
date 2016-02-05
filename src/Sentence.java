@@ -59,16 +59,25 @@ public class Sentence {
 		while (index < words.length) {
 			switch (state) {
 			case 0:
-				if (tags[index].matches("^RB.*") || tags[index].matches("^VB.*")) {
-					state = 1;	// found adverb or verb; go to next state;
+				if (tags[index].matches("^RB.*")) {
+					state = 1;	// found adverb ; go to next state;
+				} else if (words[index].equals("known")) {
+					state = 8;	// found "known"; go to state 8;
 				} else {
 					state = 7;	// unexpected word; go to end state;
 				}
 				break;
 			case 1:
-				if (tags[index].matches("^RB.*") || tags[index].matches("^VB.*")) {
-					state = 1;	// found adverb or verb; stay in state 1;
-				} else if (words[index].equals("as")) {
+				if (tags[index].matches("^RB.*")) {
+					state = 1;	// found adverb; stay in state 1;
+				} else if (words[index].equals("known")) {
+					state = 8;	// found "known"; go to state 8;
+				} else {
+					state = 7;	// unexpected word; go to end state;
+				}
+				break;
+			case 8:
+				if (words[index].equals("as")) {
 					state = 2;	// found "as"; go to state 2;
 				} else {
 					state = 7;	// unexpected word; go to end state;
@@ -151,9 +160,7 @@ public class Sentence {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-//				System.out.println("Storing: "+subject+":"+object);
 				triples.add(new Triple(subject,Triple.SAME_AS,object));
-				triples.add(new Triple(object,Triple.SAME_AS,subject));
 				object = "";	// reset object.
 				found = false;	// reset flag.
 			}

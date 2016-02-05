@@ -35,12 +35,12 @@ public class TripleStore {
 		_TripleSize = 0;
 		
 		// Add base entities
-		addEntity("entity",-1);
+//		addEntity("entity",-1);
 		addEntity("person",-1);
 		addEntity("organization",-1);
 		addEntity("location",-1);
 		addEntity("date",-1);
-		
+
 		this.addTriple(getEntity("person"),Triple.IS_A,getEntity("entity"),-1);
 		this.addTriple(getEntity("organization"),Triple.IS_A,getEntity("entity"),-1);
 		this.addTriple(getEntity("location"),Triple.IS_A,getEntity("entity"),-1);
@@ -129,6 +129,7 @@ public class TripleStore {
 		System.out.println(String.format("Entity:%d;\nTriple:%d;\nSubject:%d;\nPredicate:%d\nObject:%d\n",_Entity.size(),_TripleSize,_Subject.size(),_Predicate.size(),_Object.size()));
 		return (_TripleSize == _Subject.size() && _Subject.size() == _Predicate.size() && _Predicate.size() == _Object.size());
 	}
+	
 	public String toString() {
 		assert sanityCheck():"toString: Failed sanity check.";
 		StringBuilder sb = new StringBuilder();
@@ -163,18 +164,19 @@ public class TripleStore {
 		for (int i=0; i < _TripleSize; i++) {
 			if (_Predicate.get(i)!=Triple.SAME_AS) continue;	// skip if triple is not a SAME-AS relationship.
 			Set<Integer> current = new HashSet<>();				// init the "current" Set.
-			int target= _Subject.get(i);	// target subject.
-			
-			if (visited.contains(target)) continue;	// skip to next triple if target already visited;
+			if (visited.contains(_Subject.get(i))) continue;	// skip to next triple if target already visited;
+			current.add(_Subject.get(i));	// add target to current list;
 			
 			// crawl through rest of all triples to find target.
 			for (int j=i; j < _TripleSize; j++) {
 				if (_Predicate.get(j)!=Triple.SAME_AS) continue;	// skip if triple is not a SAME-AS relationship.
-				if (_Subject.get(j)!=target) continue;	// skip if the subject is not the target.
-				int equiv = _Object.get(j);		// equivalent entity.
-				current.add(target);	// add target to current Set;
-				current.add(equiv);		// add equivalent to current Set;
+				// if either subject or object are in the set being checked.
+				if ( current.contains(_Subject.get(j)) || current.contains(_Object.get(j) )) {	
+					current.add(_Subject.get(j));	// add target to current Set;
+					current.add(_Object.get(j));		// add equivalent to current Set;	
+				}
 			}
+			
 			visited.addAll(current);
 			
 			Iterator<Integer> it = current.iterator();

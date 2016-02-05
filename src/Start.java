@@ -126,11 +126,16 @@ public class Start {
 		
 		// ############
 		
-//		PrintWriter writer = new PrintWriter(_config.getProperty("file.out.is_a"),"UTF-8");
-//		writer.print(ts.outputIsA());
-//		writer.close();
-	
-		System.out.println(ts.outputSameAs());
+		PrintWriter writer1 = new PrintWriter(_config.getProperty("file.out.is_a"),"UTF-8");
+		writer1.print(ts.outputIsA());
+		writer1.close();
+
+		PrintWriter writer2 = new PrintWriter(_config.getProperty("file.out.same_as"),"UTF-8"); 
+		writer2.print(ts.outputSameAs());
+		writer2.close();
+		
+//		System.out.println(ts.outputIsA());
+//		System.out.println(ts.outputSameAs());
 		
 		// #############
 		
