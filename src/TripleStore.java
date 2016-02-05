@@ -1,4 +1,7 @@
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 // TripleStore is an object that store entities and the "triple" relationships between them.
@@ -11,6 +14,7 @@ public class TripleStore {
 	private Vector<Integer> _Object;	// Object of a Triple
 	private Vector<Integer> _Source;	// Origin document of the Triple
 	private Vector<String> _Entity;		// Entity names as Strings
+	private Vector<Integer> _EntitySource;	// Origin document of the Entity (first appearance)
 	private int _TripleSize = 0;		// Initial number of Triples.
 	
 	// Base Predicate ID
@@ -23,6 +27,7 @@ public class TripleStore {
 	public TripleStore () {
 		// Constructor
 		_Entity = new Vector<String>();
+		_EntitySource = new Vector<Integer>();
 		_Subject = new Vector<Integer>();
 		_Predicate = new Vector<Integer>();
 		_Object = new Vector<Integer>();
@@ -30,18 +35,19 @@ public class TripleStore {
 		_TripleSize = 0;
 		
 		// Add base entities
-		_Entity.add("entity");
-		_Entity.add("person");
-		_Entity.add("organization");
-		_Entity.add("location");
-		_Entity.add("date");
+		addEntity("entity",-1);
+		addEntity("person",-1);
+		addEntity("organization",-1);
+		addEntity("location",-1);
+		addEntity("date",-1);
+		
 		this.addTriple(getEntity("person"),Triple.IS_A,getEntity("entity"),-1);
 		this.addTriple(getEntity("organization"),Triple.IS_A,getEntity("entity"),-1);
 		this.addTriple(getEntity("location"),Triple.IS_A,getEntity("entity"),-1);
 		this.addTriple(getEntity("date"),Triple.IS_A,getEntity("entity"),-1);
 	}
 	
-	public int addEntity(String name) {
+	public int addEntity(String name,int source) {
 		// Add new entity if not exists;
 		// Return index of the new or existing entity;
 		// Return -1 if string is empty or null;
@@ -49,6 +55,7 @@ public class TripleStore {
 		if (name.isEmpty()) return -1;
 		if (_Entity.indexOf(name)<0) {	// Check if name already exists.
 			_Entity.add(name);
+			_EntitySource.add(source);
 		};
 		return _Entity.indexOf(name);
 	}
@@ -56,8 +63,8 @@ public class TripleStore {
 	public void addTriple(Triple triple, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
 		if (triple == null) return;
-		int subject = addEntity(triple.getSubject());
-		int object = addEntity(triple.getObject());
+		int subject = addEntity(triple.getSubject(),source);
+		int object = addEntity(triple.getObject(),source);
 		addTriple(subject, triple.getPredicate(), object, source);
 	}
 	
@@ -85,6 +92,7 @@ public class TripleStore {
 	
 	public void addTriples(Vector<Triple> triples, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
+		if (triples==null) return;	// return and do nothing.
 		Iterator<Triple> it = triples.iterator();
 		while (it.hasNext()) {
 			addTriple(it.next(),source);
@@ -132,4 +140,57 @@ public class TripleStore {
 		
 		return sb.toString();
 	}
+	public String outputIsA() {
+		assert sanityCheck():"toString: Failed sanity check.";
+		StringBuilder sb = new StringBuilder();
+		int i=0;
+		while(i < _TripleSize) {
+			sb.append(String.format("%s\t%s\t%d\n",
+					_Entity.get(_Object.get(i)), 
+					_Entity.get(_Subject.get(i)), 
+					_Source.get(i)));				
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	public String outputSameAs() {
+		assert sanityCheck():"toString: Failed sanity check.";
+		StringBuilder sb = new StringBuilder();
+
+		Set<Integer> visited = new HashSet<>();
+		
+		for (int i=0; i < _TripleSize; i++) {
+			if (_Predicate.get(i)!=Triple.SAME_AS) continue;	// skip if triple is not a SAME-AS relationship.
+			Set<Integer> current = new HashSet<>();				// init the "current" Set.
+			int target= _Subject.get(i);	// target subject.
+			
+			if (visited.contains(target)) continue;	// skip to next triple if target already visited;
+			
+			// crawl through rest of all triples to find target.
+			for (int j=i; j < _TripleSize; j++) {
+				if (_Predicate.get(j)!=Triple.SAME_AS) continue;	// skip if triple is not a SAME-AS relationship.
+				if (_Subject.get(j)!=target) continue;	// skip if the subject is not the target.
+				int equiv = _Object.get(j);		// equivalent entity.
+				current.add(target);	// add target to current Set;
+				current.add(equiv);		// add equivalent to current Set;
+			}
+			visited.addAll(current);
+			
+			Iterator<Integer> it = current.iterator();
+			while (it.hasNext()) {
+				int eid = it.next();
+				sb.append(String.format("%s(%d)",_Entity.get(eid),_EntitySource.get(eid)));
+				if (it.hasNext()) {
+					sb.append(',');
+				} else {
+					sb.append('\n');
+				}
+			}
+			
+		}
+		
+		return sb.toString();
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
@@ -18,7 +19,8 @@ public class Start {
 		// Read Configuration File into Properties object.
 		Properties _config = new Properties();
 		_config.load(fileIO);
-			
+
+		
 		InputStream _sourceIO = Start.class.getResourceAsStream(_config.getProperty("file.data"));
 		InputStream _modelSentIO = Start.class.getResourceAsStream(_config.getProperty("file.model.sentence"));
 		InputStream _modelTokenIO = Start.class.getResourceAsStream(_config.getProperty("file.model.token"));
@@ -68,8 +70,11 @@ public class Start {
 					}
 					// Process text between first set of commas.
 					String btwCommas = Sentence.getStuffBtwCommas(sentText[sent_id]);
-					
-					System.out.println(btwCommas);
+					if (anchor!=null && !anchor.isEmpty()) {
+						String[] w = engine.tokenize(btwCommas);
+						String[] t = engine.tagging(w);
+						ts.addTriples(Sentence.fsm_Known_As(anchor,w,t),doc_id);
+					}
 					
 					
 				} else {
@@ -81,23 +86,22 @@ public class Start {
 				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {
-					ts.addEntity(p);	// add entity to list.
+					ts.addEntity(p,doc_id);	// add entity to list.
 					ts.addTriple(p,Triple.IS_A,"person",doc_id);
 				}
 				
 				for (String o: engine.findOrganization(words)) {
-					ts.addEntity(o);	// add entity to list.
+					ts.addEntity(o,doc_id);	// add entity to list.
 					ts.addTriple(o,Triple.IS_A,"organization",doc_id);
 				}
 				
 				for (String l: engine.findLocation(words)) {
-					ts.addEntity(l);	// add entity to list.
+					ts.addEntity(l,doc_id);	// add entity to list.
 					ts.addTriple(l,Triple.IS_A,"location",doc_id);
 				}
 				
 				// Create Sentence instance
 				doc.addSentence(new Sentence(sent_id, line, words, tags));
-				
 				
 			}
 			
@@ -122,8 +126,12 @@ public class Start {
 		
 		// ############
 		
-		System.out.println(ts.toString());
-
+//		PrintWriter writer = new PrintWriter(_config.getProperty("file.out.is_a"),"UTF-8");
+//		writer.print(ts.outputIsA());
+//		writer.close();
+	
+		System.out.println(ts.outputSameAs());
+		
 		// #############
 		
 		

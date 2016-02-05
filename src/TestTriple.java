@@ -6,10 +6,10 @@ public class TestTriple {
 
 		TripleStore sem = new TripleStore();
 		
-		sem.addEntity("Character");
-		sem.addEntity("Thing1");
-		sem.addEntity("Thing2");
-		sem.addEntity("CatInAHat");
+		sem.addEntity("Character",0);
+		sem.addEntity("Thing1",0);
+		sem.addEntity("Thing2",0);
+		sem.addEntity("CatInAHat",0);
 		
 		sem.sanityCheck();
 		

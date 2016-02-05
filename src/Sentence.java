@@ -46,7 +46,7 @@ public class Sentence {
 		return "";
 	}
 	
-	public static Vector<Triple> fsm_Kown_As(String subject, String[] words, String[] tags) {
+	public static Vector<Triple> fsm_Known_As(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "Known-As" pattern.
 		Vector<Triple> triples = new Vector<Triple>();
 		String object = "";
@@ -145,14 +145,15 @@ public class Sentence {
 				break;
 			}
 			
-			System.out.println("State:"+state+" tag:"+tags[index]+" word:"+words[index]);;
+//			System.out.println("State:"+state+" tag:"+tags[index]+" word:"+words[index]);;
 			
 			index ++;
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				System.out.println("Storing: "+subject+":"+object);
+//				System.out.println("Storing: "+subject+":"+object);
 				triples.add(new Triple(subject,Triple.SAME_AS,object));
+				triples.add(new Triple(object,Triple.SAME_AS,subject));
 				object = "";	// reset object.
 				found = false;	// reset flag.
 			}
