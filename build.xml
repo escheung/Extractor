@@ -57,6 +57,7 @@
     </target>
     <target name="Start">
         <java classname="Start" failonerror="true" fork="yes">
+            <jvmarg line="-Xms1024M -Xmx2048M"/>
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
@@ -65,13 +66,13 @@
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
-    <target name="TestTriple">
-        <java classname="TestTriple" failonerror="true" fork="yes">
+    <target name="TestToken">
+        <java classname="TestToken" failonerror="true" fork="yes">
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
-    <target name="TestToken">
-        <java classname="TestToken" failonerror="true" fork="yes">
+    <target name="TestTriple">
+        <java classname="TestTriple" failonerror="true" fork="yes">
             <classpath refid="Extractor.classpath"/>
         </java>
     </target>
