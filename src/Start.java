@@ -30,14 +30,12 @@ public class Start {
 		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
 		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
 		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
-		InputStream _modelNerDateIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.date"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(_sourceIO));
 		
 		int doc_id = 0;	// Document index/counter
-		int SentenceToProcess = 1;	// The number of sentence to process in each Document.
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();  // A vector Documents
-		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO, _modelNerDateIO);
+		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		TripleStore ts = new TripleStore();
 		
 		// Foreach Document in file;
@@ -136,7 +134,6 @@ public class Start {
 		_modelNerPersonIO.close();
 		_modelNerLocationIO.close();
 		_modelNerOrganizationIO.close();
-		_modelNerDateIO.close();
 		_sourceIO.close();
 
 		

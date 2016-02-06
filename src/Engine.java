@@ -33,9 +33,8 @@ public class Engine {
 	private NameFinderME _nameFinderPerson;
 	private NameFinderME _nameFinderLocation;
 	private NameFinderME _nameFinderOrganization;
-	private NameFinderME _nameFinderDate;
 
-	public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO, InputStream nerDateIO) throws Exception{
+	public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO) throws Exception{
 		
 		this._sentenceDetector = new SentenceDetectorME(new SentenceModel(sentIO));
 		this._tokenizer = new TokenizerME(new TokenizerModel(tokenIO));
@@ -45,7 +44,6 @@ public class Engine {
 		this._nameFinderPerson = new NameFinderME(new TokenNameFinderModel(nerPerIO));
 		this._nameFinderLocation = new NameFinderME(new TokenNameFinderModel(nerLocIO));
 		this._nameFinderOrganization = new NameFinderME(new TokenNameFinderModel(nerOrgIO));
-		this._nameFinderDate = new NameFinderME(new TokenNameFinderModel(nerDateIO));
 	}
 	
 	public String[] splitDocument(String text, String delimiter) {
@@ -117,12 +115,6 @@ public class Engine {
 		Span orgSpans[] = _nameFinderOrganization.find(tokens);
 		_nameFinderOrganization.clearAdaptiveData();
 		return (Span.spansToStrings(orgSpans, tokens));
-	}
-	
-	public String[] findDate(String[] tokens) {
-		Span dateSpans[] = _nameFinderDate.find(tokens);
-		_nameFinderDate.clearAdaptiveData();
-		return (Span.spansToStrings(dateSpans, tokens));
 	}
 	
 	public static String[] applyPOS(String[] tokens, InputStream modelIn) throws IOException {
