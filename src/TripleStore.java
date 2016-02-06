@@ -70,8 +70,8 @@ public class TripleStore {
 	
 	public void addTriple(String subject_name, int predicate, String object_name, int source) {
 		assert sanityCheck():"Failed Sanity Check.";
-		int subject = getEntity(subject_name);
-		int object = getEntity(object_name);
+		int subject = addEntity(subject_name,source);
+		int object = addEntity(object_name,source);
 		addTriple(subject,predicate,object,source);
 	}
 	
@@ -149,15 +149,27 @@ public class TripleStore {
 		StringBuilder sb = new StringBuilder();
 		int i=0;
 		while(i < _TripleSize) {
-			sb.append(String.format("%s\t%s\t%d\n",
-					_Entity.get(_Object.get(i)), 
-					_Entity.get(_Subject.get(i)), 
-					_Source.get(i)));				
+			if (_Predicate.get(i) == Triple.IS_A) {
+				sb.append(String.format("%s\t%s\t%d\n",
+						_Entity.get(_Object.get(i)), 
+						_Entity.get(_Subject.get(i)), 
+						_Source.get(i)));
+			}
 			i++;
 		}
 		return sb.toString();
 	}
-	
+	public String outputSameAsRaw() {
+		assert sanityCheck():"outputSameAsRaw: Failed sanity check.";
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i=0; i < _TripleSize; i++) {
+			if (_Predicate.get(i) == Triple.SAME_AS) {
+				sb.append(String.format("%s = %s (%d)\n", _Entity.get(_Subject.get(i)),_Entity.get(_Object.get(i)),_Source.get(i)));
+			}
+		}
+		return sb.toString();
+	}
 	public String outputSameAs() {
 		assert sanityCheck():"toString: Failed sanity check.";
 		StringBuilder sb = new StringBuilder();

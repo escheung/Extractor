@@ -53,7 +53,9 @@ public class Start {
 			for (int sent_id=0; sent_id < sentText.length; sent_id++) {
 				if (sentText[sent_id] == null) continue;
 				if (sentText[sent_id].isEmpty()) continue;
+				
 				String line = Sentence.delStuffBtwCommas(sentText[sent_id]);
+				line = Sentence.delStuffBtwSingleQuote(line);
 				
 				// Tokenize each line
 				String[] words = engine.tokenize(line);
@@ -75,6 +77,17 @@ public class Start {
 						String[] t = engine.tagging(w);
 						ts.addTriples(Sentence.fsm_Known_As(anchor,w,t),doc_id);
 					}
+					String btwSinglQuote = Sentence.getStuffBtwSingleQuote(sentText[sent_id]);
+					if (anchor!=null && !anchor.isEmpty()) {
+						String[] w = engine.tokenize(btwSinglQuote);
+						String[] t = engine.tagging(w);
+						String n = Sentence.getNounOnly(w,t);
+						if (!n.isEmpty()) {
+							ts.addTriple(anchor, Triple.SAME_AS, n, doc_id);
+						}
+					}
+					
+					
 				} else {
 					// Use FSM to detect Pronoun IS-A pattern.
 					// TODO: make FSM.
@@ -136,9 +149,6 @@ public class Start {
 		PrintWriter writer2 = new PrintWriter(_config.getProperty("file.out.same_as"),"UTF-8"); 
 		writer2.print(ts.outputSameAs());
 		writer2.close();
-		
-//		System.out.println(ts.outputIsA());
-//		System.out.println(ts.outputSameAs());
 		
 		// #############
 		

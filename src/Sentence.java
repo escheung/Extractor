@@ -30,6 +30,21 @@ public class Sentence {
 		return _ID;
 	}
 	
+	public static String delStuffBtwSingleQuote(String text) {
+		String line = text;
+		line = line.replaceAll("'.*?'", "");
+		return line;
+	}
+	
+	public static String getStuffBtwSingleQuote(String text) {
+		int i1 = text.indexOf('\'');
+		int i2 = text.indexOf('\'',i1+1);
+		if (i1>0 && i2>i1) {
+			return text.substring(i1+1,  i2);
+		}
+		return "";
+	}
+	
 	public static String delStuffBtwCommas(String text) {
 		String line = text;
 		// Remove items between commas;
@@ -44,6 +59,23 @@ public class Sentence {
 			return text.substring(i1+1, i2);
 		}
 		return "";
+	}
+	
+	public static String getNounOnly(String[] words, String[] tags) {
+		// Returns the first consecutive nouns, stops when first non-noun detected.
+		StringBuilder noun = new StringBuilder();
+		//for (int i=0; i<words.length; i++) {
+		int index=0;
+		while (index < words.length) {
+			if (tags[index].matches("^NN.*")) {
+				if (index>0) noun.append(' ');
+				noun.append(words[index]);
+			} else {
+				break;
+			}
+			index++;
+		}
+		return noun.toString();
 	}
 	
 	public static Triple fsm_Plays_For(String[] words, String[] tags) {
@@ -392,105 +424,6 @@ public class Sentence {
 		if (success) triple = new Triple(subject,Triple.IS_A,object);
 		return triple;
 	}
-	/*
-	public static Vector<Triple> fsm_Is_A(String[] words, String[] tags) {
-		Vector<Triple> triples = new Vector<Triple>();
-		
-		String subject = "";
-		String object = "";
-		int state = 0;	// state index.
-		int index = 0;	// word index in sentence.
-		boolean found = false;	// flag for finding a triple.
-		while (index < words.length) {
-			switch (state) {
-				case 0:
-					if (tags[index].matches("^NN.*")) {
-						subject = subject.concat(words[index]);
-						state = 1;	// found subject/anchor term.
-					};
-					break;
-				case 1:
-					if (tags[index].matches("^NN.*") || words[index].equalsIgnoreCase("do")) {
-						// found another NN* word or a "do" , stay in state 1.
-						subject = subject.concat(" " + words[index]);
-						state = 1;	// found another NN* word, stay in state 1.
-					} else if (words[index].matches("^(is|are)$")) {
-						state = 2;	// found is/are; move to state 2.
-					} else {
-						state = 7;	// does not follow IS-A pattern; go to end state.
-					}
-					break;
-				case 2:
-					if (tags[index].matches("^RB.*")) {	// adverb
-						state = 3;	// found an adverb; go to state 3;
-					} else if (words[index].matches("^(a|an|the)$")) {
-						state = 4;	// found a/an/the; move to state 4.
-					} else {
-						state = 7;	// does not follow IS-A pattern; go to end state.
-					}
-					break;
-				case 3:
-					if (words[index].matches("^(a|an|the)$")) {
-						state = 4;	// found a/an/the; move to state 4.
-					} else {
-						state = 7;	// go to end state.
-					}
-					break;
-				case 4:
-					if (tags[index].matches("^JJ.*")||tags[index].matches("^VB.*")) {
-						state = 5;	// found adjective or verb; move to state 5.
-					} else if (tags[index].matches("^NN.*")) {
-						object = object.concat(words[index]);
-						state = 6;
-					} else {
-						state = 7;	// go to end state.
-					}
-					break;
-				case 5:
-					if (tags[index].matches("^NN.*")) {
-						object = object.concat(words[index]);
-						state = 6;
-					} else if (tags[index].matches("^JJ.*")||tags[index].matches("^VB.*")) {
-						// found more adjective or verg; stay in state 5.
-						state = 5;
-					} else {
-						state = 7;	// go to end state.
-					}
-					break;
-				case 6:
-					if (tags[index].matches("^NN.*")) {
-						object = object.concat(" "+words[index]);
-						state = 6;
-					} else {
-						found = true;
-						state = 7;	// go to end state.
-					}
-					break;
-				case 7:
-					// End of FSM
-					break;
-				default: 
-					break;
-			}
 
-
-			// if found both subject and object
-			if (found && !subject.isEmpty() && !object.isEmpty()) {
-				// add new triple
-				triples.add(new Triple(subject,Triple.IS_A,object));
-				// reset object; keep subject/anchor;
-				object = "";
-				// reset flag "found"
-				found = false;
-			}
-			
-			index++;	// increment index;
-		}
-		
-		
-		return triples;
-	}
-*/
-	
 
 }
