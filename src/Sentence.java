@@ -78,9 +78,11 @@ public class Sentence {
 		return noun.toString();
 	}
 	
-	public static Triple fsm_Plays_For(String[] words, String[] tags) {
+	public static Vector<Triple> fsm_Plays_For(String[] words, String[] tags) {
 		// This FSM tries to find the Plays-For pattern.
-		Triple triple = null;
+		
+		//Triple triple = null;
+		Vector<Triple> triples = new Vector<Triple>();
 		String subject = "";
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
@@ -125,10 +127,11 @@ public class Sentence {
 		}
 		
 		if (!subject.isEmpty()) {
-			triple = new Triple(subject,Triple.IS_A,"football team");
+			triples.add(new Triple(subject,Triple.IS_A,"football_team"));
+			triples.add(new Triple(subject,Triple.IS_A,"organization"));
 		}
 		
-		return triple;
+		return triples;
 	}
 	
 	public static Vector<Triple> fsm_As_A(String subject, String[] words, String[] tags) {
@@ -202,6 +205,9 @@ public class Sentence {
 				if (words[index].matches("^(a|an|the)$")) {
 					// found "a/an/the"; go to state 2;
 					state = 2;
+				} else if (tags[index].matches("^JJ.*")) {
+					// found adjective; go to state 3;
+					state = 3;
 				} else {
 					// word not expected; go to end state;
 					state = 6;
@@ -217,6 +223,7 @@ public class Sentence {
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
 				triples.add(new Triple(subject,Triple.IS_A,object));
+				triples.add(new Triple(object,Triple.IS_A,"position"));
 				object= "";	// reset subject.
 				found = false;	// reset flag.
 			}
@@ -335,18 +342,18 @@ public class Sentence {
 		
 		return triples;
 	}
-	
 
-
-	
-	public static Triple fsm_Is_A(String[] words, String[] tags) {
+	public static Vector<Triple> fsm_Is_A(String[] words, String[] tags) {
 		// This FSM tries to find the IS-A pattern.
-		Triple triple = null;
+		//Triple triple = null;
+		Vector<Triple> triples = new Vector<Triple>();
 		boolean success = false;
 		String subject = "";
 		String object = "";
+		String keyJJ = "";
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
+		
 		while (index < words.length) {
 			switch (state) {
 				case 0:
@@ -356,7 +363,7 @@ public class Sentence {
 					};
 					break;
 				case 1:
-					if (tags[index].matches("^NN.*") || words[index].equalsIgnoreCase("do")) {
+					if (tags[index].matches("^NN.*") || words[index].equalsIgnoreCase("do") || words[index].equalsIgnoreCase("da")) {
 						// found another NN* word or a "do" , stay in state 1.
 						subject = subject.concat(" " + words[index]);
 						state = 1;	// found another NN* word, stay in state 1.
@@ -383,8 +390,11 @@ public class Sentence {
 					}
 					break;
 				case 4:
-					if (tags[index].matches("^JJ.*")||tags[index].matches("^VB.*")) {
-						state = 5;	// found adjective or verb; move to state 5.
+					if (tags[index].matches("^JJ.*")) {
+						keyJJ = words[index];	// key adjective, possibly nationality of player.
+						state = 5;	// found adjective; move to state 5.
+					} else if (tags[index].matches("^VB.*")) {
+						state = 5; // found verb; go to state 5;
 					} else if (tags[index].matches("^NN.*")) {
 						object = object.concat(words[index]);
 						state = 6;
@@ -396,9 +406,12 @@ public class Sentence {
 					if (tags[index].matches("^NN.*")) {
 						object = object.concat(words[index]);
 						state = 6;
-					} else if (tags[index].matches("^JJ.*")||tags[index].matches("^VB.*")) {
-						// found more adjective or verg; stay in state 5.
+					} else if (tags[index].matches("^JJ.*")) {
+						// found more adjective; stay in state 5.
 						state = 5;
+					} else if (tags[index].matches("^VB.*")) {
+						// found more verb; stay in state 5.
+						state =5;
 					} else {
 						state = 7;	// go to end state.
 					}
@@ -421,9 +434,113 @@ public class Sentence {
 			index++;	// increment index;
 		}
 		
-		if (success) triple = new Triple(subject,Triple.IS_A,object);
-		return triple;
+		if (success) {
+			triples.add(new Triple(subject,Triple.IS_A,object));
+			if (object.equals("footballer")) {	// a footballer is a person.
+				triples.add(new Triple(subject,Triple.IS_A,"person"));
+				if (!keyJJ.isEmpty()) {	// a key adjective is found; likely nationality.
+					triples.add(new Triple(keyJJ,Triple.IS_A,"nationality"));
+				}
+			}
+		}
+		return triples;
 	}
 
+	
+	/*
+	public static Triple fsm_Is_A(String[] words, String[] tags) {
+		// This FSM tries to find the IS-A pattern.
+		Triple triple = null;
+		boolean success = false;
+		String subject = "";
+		String object = "";
+		int state = 0;	// state index.
+		int index = 0;	// word index in sentence.
+		while (index < words.length) {
+			switch (state) {
+				case 0:
+					if (tags[index].matches("^NN.*")) {
+						subject = subject.concat(words[index]);
+						state = 1;	// found subject/anchor term.
+					};
+					break;
+				case 1:
+					if (tags[index].matches("^NN.*") || words[index].equalsIgnoreCase("do") || words[index].equalsIgnoreCase("da")) {
+						// found another NN* word or a "do" , stay in state 1.
+						subject = subject.concat(" " + words[index]);
+						state = 1;	// found another NN* word, stay in state 1.
+					} else if (words[index].matches("^(is|are)$")) {
+						state = 2;	// found is/are; move to state 2.
+					} else {
+						state = 7;	// does not follow IS-A pattern; go to end state.
+					}
+					break;
+				case 2:
+					if (tags[index].matches("^RB.*")) {	// adverb
+						state = 3;	// found an adverb; go to state 3;
+					} else if (words[index].matches("^(a|an|the)$")) {
+						state = 4;	// found a/an/the; move to state 4.
+					} else {
+						state = 7;	// does not follow IS-A pattern; go to end state.
+					}
+					break;
+				case 3:
+					if (words[index].matches("^(a|an|the)$")) {
+						state = 4;	// found a/an/the; move to state 4.
+					} else {
+						state = 7;	// go to end state.
+					}
+					break;
+				case 4:
+					if (tags[index].matches("^JJ.*")) {
+						state = 5;	// found adjective; move to state 5.
+					} else if (tags[index].matches("^VB.*")) {
+						state = 5; // found verb; go to state 5;
+					} else if (tags[index].matches("^NN.*")) {
+						object = object.concat(words[index]);
+						state = 6;
+					} else {
+						state = 7;	// go to end state.
+					}
+					break;
+				case 5:
+					if (tags[index].matches("^NN.*")) {
+						object = object.concat(words[index]);
+						state = 6;
+					} else if (tags[index].matches("^JJ.*")) {
+						// found more adjective; stay in state 5.
+						state = 5;
+					} else if (tags[index].matches("^VB.*")) {
+						// found more verb; stay in state 5.
+						state =5;
+					} else {
+						state = 7;	// go to end state.
+					}
+					break;
+				case 6:
+					if (tags[index].matches("^NN.*")) {
+						object = object.concat(" "+words[index]);
+						state = 6;
+					} else {
+						state = 7;	// go to end state.
+					}
+					break;
+				case 7:
+					// End of FSM
+					break;
+				default: 
+					break;
+			}
+			success = !subject.isEmpty() && !object.isEmpty();
+			index++;	// increment index;
+		}
+		
+		if (success) {
+			triple = new Triple(subject,Triple.IS_A,object);
+			
+		}
+		return triple;
+	}
+*/
 
 }

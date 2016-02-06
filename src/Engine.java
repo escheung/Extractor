@@ -34,16 +34,18 @@ public class Engine {
 	private NameFinderME _nameFinderLocation;
 	private NameFinderME _nameFinderOrganization;
 
-	public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO) throws Exception{
-		
+	//public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO, InputStream chunkerIO, InputStream parserIO, InputStream nerPerIO, InputStream nerLocIO, InputStream nerOrgIO) throws Exception{
+	public Engine (InputStream sentIO, InputStream tokenIO, InputStream posIO) throws Exception{		
 		this._sentenceDetector = new SentenceDetectorME(new SentenceModel(sentIO));
 		this._tokenizer = new TokenizerME(new TokenizerModel(tokenIO));
 		this._tagger = new POSTaggerME(new POSModel(posIO));
+/*
 		this._chunker = new ChunkerME(new ChunkerModel(chunkerIO));
 		this._parser = ParserFactory.create(new ParserModel(parserIO));
 		this._nameFinderPerson = new NameFinderME(new TokenNameFinderModel(nerPerIO));
 		this._nameFinderLocation = new NameFinderME(new TokenNameFinderModel(nerLocIO));
 		this._nameFinderOrganization = new NameFinderME(new TokenNameFinderModel(nerOrgIO));
+*/
 	}
 	
 	public String[] splitDocument(String text, String delimiter) {

@@ -25,17 +25,20 @@ public class Start {
 		InputStream _modelSentIO = Start.class.getResourceAsStream(_config.getProperty("file.model.sentence"));
 		InputStream _modelTokenIO = Start.class.getResourceAsStream(_config.getProperty("file.model.token"));
 		InputStream _modelPosIO = Start.class.getResourceAsStream(_config.getProperty("file.model.pos"));
+/*
 		InputStream _modelChunkerIO = Start.class.getResourceAsStream(_config.getProperty("file.model.chunker"));
 		InputStream _modelParserIO = Start.class.getResourceAsStream(_config.getProperty("file.model.parser"));
 		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
 		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
 		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
+*/
 		BufferedReader br = new BufferedReader(new InputStreamReader(_sourceIO));
 		
 		int doc_id = 0;	// Document index/counter
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();  // A vector Documents
-		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
+		//Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
+		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO);
 		TripleStore ts = new TripleStore();
 		
 		// Foreach Document in file;
@@ -63,10 +66,17 @@ public class Start {
 				if (sent_id==0) {
 					// First sentence in document; Look for Anchor Term.
 					// Use FSM to find basic Noun IS-A pattern.
+					/*
 					Triple triple = Sentence.fsm_Is_A(words, tags);
 					if (triple != null) {
 						ts.addTriple(triple, doc_id);
 						anchor = triple.getSubject();
+					}*/
+					Vector<Triple> triples = Sentence.fsm_Is_A(words, tags);
+					if (triples.size()>0) {
+						Triple t = triples.get(0);
+						if (t != null)anchor = t.getSubject();							
+						ts.addTriples(triples, doc_id);
 					}
 					// Process text between first set of commas.
 					String btwCommas = Sentence.getStuffBtwCommas(sentText[sent_id]);
@@ -93,11 +103,12 @@ public class Start {
 				}
 				
 				// Finding football teams in "Plays/ed for" pattern
-				ts.addTriple(Sentence.fsm_Plays_For(words, tags),doc_id);
+				ts.addTriples(Sentence.fsm_Plays_For(words, tags),doc_id);
 				
 				// Finding football positions in "As A" pattern
 				ts.addTriples(Sentence.fsm_As_A(anchor, words, tags), doc_id);
-				
+
+/*				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {
 					ts.addEntity(p,doc_id);	// add entity to list.
@@ -113,7 +124,7 @@ public class Start {
 					ts.addEntity(l,doc_id);	// add entity to list.
 					ts.addTriple(l,Triple.IS_A,"location",doc_id);
 				}
-				
+*/				
 				// Create Sentence instance
 				doc.addSentence(new Sentence(sent_id, line, words, tags));
 				
@@ -130,10 +141,12 @@ public class Start {
 		_modelSentIO.close();
 		_modelTokenIO.close();
 		_modelPosIO.close();
+/*		
 		_modelChunkerIO.close();
 		_modelNerPersonIO.close();
 		_modelNerLocationIO.close();
 		_modelNerOrganizationIO.close();
+*/
 		_sourceIO.close();
 
 		
