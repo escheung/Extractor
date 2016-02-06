@@ -99,6 +99,99 @@ public class Sentence {
 		return triple;
 	}
 	
+	public static Vector<Triple> fsm_As_A(String subject, String[] words, String[] tags) {
+		
+		// This FSM tries to find the "As-A" position pattern.
+		Vector<Triple> triples = new Vector<Triple>();
+		String object = "";
+		int state = 0;
+		int index = 0;
+		boolean found = false;	// flag for finding an object.
+		//if (subject == null) return triples;	// return empty triple vector;
+		//if (subject.isEmpty()) return triples;	// return empty triple vector;
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].equalsIgnoreCase("as")) {
+					// found "as"; go to state 1;
+					state = 1;
+				} else {
+					// stay in state 0;
+					state = 0;
+				}
+				break;
+			case 1:
+				if (words[index].matches("^(a|an|the)$")) {
+					// found "a/an/the"; go to state 2;
+					state = 2;
+				} else {
+					// word not expected; go to end state;
+					state = 6;
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^JJ.*")) {
+					// found adjective; go to state 3;
+					state = 3;
+				} else if (tags[index].matches("^NN.*")) {
+					// found an noun;
+					object = object.concat(words[index]);	// add word to object string.
+					state = 4;
+				} else {
+					// word not expected; go to end state;
+					state = 6;
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*")) {
+					// found noun
+					object = object.concat(words[index]);	// add word to object string.
+					state = 4;
+				} else {
+					// unexpected word; go to end state;
+					state = 6;
+				}
+				break;
+			case 4:
+				if (tags[index].matches("^NN.*")) {
+					// found noun
+					object = object.concat(" "+words[index]);	// add word to object string.
+					state = 4;	// stay in state 4.
+				} else if (words[index].matches("^(and|or)$")) {
+					found = true;
+					state = 5;
+				} else {
+					found = true;
+					state = 6;
+				}
+				break;
+			case 5:
+				if (words[index].matches("^(a|an|the)$")) {
+					// found "a/an/the"; go to state 2;
+					state = 2;
+				} else {
+					// word not expected; go to end state;
+					state = 6;
+				}
+				break;
+				
+			default:
+				break;
+			}
+			
+			index++;
+			// if found = true; store triple.
+			if (found || (index>=words.length && !object.isEmpty())) {
+				// add triple to vector
+				triples.add(new Triple(subject,Triple.IS_A,object));
+				object= "";	// reset subject.
+				found = false;	// reset flag.
+			}
+		}
+		return triples;
+	}
+	
 	public static Vector<Triple> fsm_Known_As(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "Known-As" pattern.
 		Vector<Triple> triples = new Vector<Triple>();
@@ -111,25 +204,16 @@ public class Sentence {
 		
 		while (index < words.length) {
 			switch (state) {
-			case 0:
+			case 0:	// init/adverb state;
 				if (tags[index].matches("^RB.*")) {
-					state = 1;	// found adverb ; go to next state;
+					state = 0;	// found adverb ; go to next state;
 				} else if (words[index].equals("known")) {
-					state = 8;	// found "known"; go to state 8;
+					state = 1;	// found "known"; go to state 8;
 				} else {
 					state = 7;	// unexpected word; go to end state;
 				}
 				break;
-			case 1:
-				if (tags[index].matches("^RB.*")) {
-					state = 1;	// found adverb; stay in state 1;
-				} else if (words[index].equals("known")) {
-					state = 8;	// found "known"; go to state 8;
-				} else {
-					state = 7;	// unexpected word; go to end state;
-				}
-				break;
-			case 8:
+			case 1:	// found known;
 				if (words[index].equals("as")) {
 					state = 2;	// found "as"; go to state 2;
 				} else {
@@ -207,8 +291,6 @@ public class Sentence {
 				break;
 			}
 			
-//			System.out.println("State:"+state+" tag:"+tags[index]+" word:"+words[index]);;
-			
 			index ++;
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
@@ -222,6 +304,7 @@ public class Sentence {
 		return triples;
 	}
 	
+
 
 	
 	public static Triple fsm_Is_A(String[] words, String[] tags) {

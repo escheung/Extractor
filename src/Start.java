@@ -81,8 +81,11 @@ public class Start {
 					
 				}
 				
-				// Finding football teams in "Plays/ed" for pattern
+				// Finding football teams in "Plays/ed for" pattern
 				ts.addTriple(Sentence.fsm_Plays_For(words, tags),doc_id);
+				
+				// Finding football positions in "As A" pattern
+				ts.addTriples(Sentence.fsm_As_A(anchor, words, tags), doc_id);
 				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {

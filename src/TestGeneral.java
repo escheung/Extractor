@@ -40,8 +40,8 @@ public class TestGeneral {
 		//String text = "AntÃ´nio Augusto Ribeiro Reis Jr., commonly known as Juninho or Juninho Pernambucano, is a retired Brazilian footballer. Renowned for his bending free kicks, he is widely considered to be the greatest free-kick specialist of all time.\nHe led Olympique Lyonnais to seven consecutive Ligue 1 titles before leaving the club in 2009, having scored 100 goals in 350 official games for Lyon.\nFrom his international debut in 1999, Juninho played 40 games for the Brazilian national team and scored six goals. He played at the 2001 Copa AmÃ©rica and retired from international football after the 2006 World Cup.\nSince 2013 Juninho has been a football commentator with Brazilian sports network Rede Globo.";
 		//String text = "Louis Noé Pamarot (born 14 April 1979), more commonly known as Noé Pamarot, is a French footballer who plays as a central defender for Spanish side Granada.";
 		//String text = "Sport Club do Recife is a Brazilian sports club, located in the city of Recife, in the state of Pernambuco.";
-		String text = "Rafael TolÃ³i (born 10 October 1990) is a Brazilian football defender who plays for GoiÃ¡s in the Brazilian SÃ©rie B. He represents Brazil at under-20 level. He was born in GlÃ³ria d'Oeste.\nHe is part of GoiÃ¡s squad since 2008, and helped his club win the Campeonato Goiano in 2009. As of November 21, 2009, Rafael TolÃ³i played 17 SÃ©rie B games for GoiÃ¡s, and scored two goals.\nCampeonato Goiano: 2009, 2012";
-		
+		//String text = "Rafael TolÃ³i (born 10 October 1990) is a Brazilian football defender who plays for GoiÃ¡s in the Brazilian SÃ©rie B. He represents Brazil at under-20 level. He was born in GlÃ³ria d'Oeste.\nHe is part of GoiÃ¡s squad since 2008, and helped his club win the Campeonato Goiano in 2009. As of November 21, 2009, Rafael TolÃ³i played 17 SÃ©rie B games for GoiÃ¡s, and scored two goals.\nCampeonato Goiano: 2009, 2012";
+		String text = "Jérémy Ménez (French pronunciation: [ʒe.re.mi me.nɛz] ; born 7 May 1987) is a French international footballer who currently plays for French club Paris Saint-Germain in Ligue 1. He plays many positions in the attacking midfield, usually as a winger and a playmaker. Ménez has been described as a ambidextrous technically skilled playmaker with undeniable pace.\nMénez began his career spending time with various clubs in the Île-de-France region such as the Centre de Formation de Paris and CSF Brétigny. In 2001, he secured a move to Sochaux and spent four years in the club's youth academy. In March 2004, Ménez became the youngest professional football player in the history of Ligue 1 after signing a professional contract and made his professional debut in the 2004–05 season. With Sochaux, he played European football for the first time after participating in the 2005–05 edition of the UEFA Cup. After two seasons at the club, he joined Monaco. At Monaco, Ménez developed into a play-making midfielder under the tutelage of Brazilian manager Ricardo Gomes. After two successful seasons in Monaco, he signed for Serie A club Roma on a four-year contract. With Roma, Ménez featured in the UEFA";
 		text = Document.preprocess(text);
 		//text = Sentence.delStuffBtwCommas(text);
 		//text = Sentence.getStuffBtwCommas(text);
@@ -52,8 +52,12 @@ public class TestGeneral {
 		System.out.println(Arrays.toString(words));
 		System.out.println(Arrays.toString(tags));
 		
-		run_FSM_Is_A(words, tags);
-		run_FSM_Plays_For(words, tags);
+		
+		
+		
+		run_FSM_As_A(words,tags);
+	//	run_FSM_Is_A(words, tags);
+	//	run_FSM_Plays_For(words, tags);
 		
 		fileIO.close();
 		_modelSentIO.close();
@@ -65,6 +69,16 @@ public class TestGeneral {
 		_modelNerOrganizationIO.close();
 		_modelNerDateIO.close();
 		_sourceIO.close();
+	}
+	
+	private static void run_FSM_As_A(String[] words, String[] tags) {
+		Vector<Triple> triples = Sentence.fsm_As_A("Eric",words, tags);
+		Iterator<Triple> it = triples.iterator();
+		System.out.println("FSM: As A - Size:"+triples.size());
+		while (it.hasNext()) {
+			Triple t = it.next();
+			System.out.println(t.getSubject() + " is-a " + t.getObject());
+		}
 	}
 
 	private static void run_FSM_Is_A(String[] words, String[] tags) {
