@@ -7,7 +7,8 @@ Linux/Windows OS, JAVA 1.7, Apache ANT.
 -------
 INSTALL
 -------
-
+Unzip the package
+ 
 -------
 COMPILE
 -------
