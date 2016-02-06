@@ -134,6 +134,70 @@ public class Sentence {
 		return triples;
 	}
 	
+	public static Vector<Triple> fsm_City_Of(String[] words, String[] tags) {
+		// This FSM tries to find the "City Of" pattern to discover city names.
+		Vector<Triple> triples = new Vector<Triple>();
+		String subject = "";
+		int state = 0;
+		int index = 0;
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].equalsIgnoreCase("city")) {
+					// found "city"; go to state 1;
+					state = 1;
+				} else {
+					// nothing yet; stay here.
+					state = 0;
+				}
+				break;
+			case 1:
+				if (words[index].equalsIgnoreCase("of")) {
+					// found "of"; go to state 2;
+					state = 2;
+				} else {
+					// broke pattern; go back to 0;
+					state = 0;
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*")) {
+					// found noun;
+					subject = subject.concat(words[index]);
+					state = 3;
+				} else {
+					// pattern broken; go to end state.
+					state = 4;
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*")) {
+					// found noun;
+					subject = subject.concat(" "+words[index]);
+					state = 3;	// stay here.
+				} else {
+					// pattern broken; go to end state.
+					state = 4;
+				}
+				break;
+			case 4:
+				// end state;
+				break;
+			default:
+				break;
+			}
+			
+			index++;
+			if (index >= words.length && !subject.isEmpty()) {
+				// reached end of sentence and found subject.
+				triples.add(new Triple(subject,Triple.IS_A,"city"));
+				triples.add(new Triple(subject,Triple.IS_A,"location"));
+			}
+		}
+		return triples;
+	}
+	
 	public static Vector<Triple> fsm_As_A(String subject, String[] words, String[] tags) {
 		
 		// This FSM tries to find the "As-A" position pattern.

@@ -27,16 +27,15 @@ public class TestGeneral {
 		InputStream _modelChunkerIO = Start.class.getResourceAsStream(_config.getProperty("file.model.chunker"));
 		InputStream _modelParserIO = Start.class.getResourceAsStream(_config.getProperty("file.model.parser"));
 
-/*		
+		
  		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
 		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
 		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
-		InputStream _modelNerDateIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.date"));
-*/
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(_sourceIO));
 		
 		//Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
-		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO);
+		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		//String text = "Giacomo Bonaventura (born 22 August 1989 in San Severino Marche) is an Italian professional football (soccer) midfielder.";
 		//String text = "Pedro Filipe Teodósio Mendes (born 1 October 1990 in Neuchâtel, Switzerland) is a Portuguese footballer who plays for Real Madrid Castilla on loan from Sporting Clube de Portugal, as a central defender.\nMendes reached Sporting Clube de Portugal's youth system in 2003, aged 12. In his first two senior seasons, he played with Real Sport Clube (third division) and Servette FC (Switzerland, second level), in both cases on loan, helping the latter club to promotion.\nIn the 2011 summer, still owned by Sporting, Mendes joined Real Madrid, being assigned to the B team. On 7 December 2011, he made his first-team debut, replacing Álvaro Arbeloa midway through the second half of a 3–0 away win against AFC Ajax for the season's UEFA Champions League.";
 		//String text = "Studio Angelo Franchi is a football ground.";
@@ -69,12 +68,11 @@ public class TestGeneral {
 		_modelTokenIO.close();
 		_modelPosIO.close();
 		_modelChunkerIO.close();
-		/*
+		
 		_modelNerPersonIO.close();
 		_modelNerLocationIO.close();
 		_modelNerOrganizationIO.close();
-		_modelNerDateIO.close();
-		*/
+		
 		_sourceIO.close();
 	}
 	

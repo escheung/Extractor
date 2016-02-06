@@ -28,17 +28,18 @@ public class Start {
 /*
 		InputStream _modelChunkerIO = Start.class.getResourceAsStream(_config.getProperty("file.model.chunker"));
 		InputStream _modelParserIO = Start.class.getResourceAsStream(_config.getProperty("file.model.parser"));
+*/
 		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
 		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
 		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
-*/
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(_sourceIO));
 		
 		int doc_id = 0;	// Document index/counter
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();  // A vector Documents
 		//Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
-		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO);
+		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		TripleStore ts = new TripleStore();
 		
 		// Foreach Document in file;
@@ -108,7 +109,9 @@ public class Start {
 				// Finding football positions in "As A" pattern
 				ts.addTriples(Sentence.fsm_As_A(anchor, words, tags), doc_id);
 
-/*				
+				// finding city in "City Of" pattern
+				ts.addTriples(Sentence.fsm_City_Of(words, tags),doc_id);
+				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {
 					ts.addEntity(p,doc_id);	// add entity to list.
@@ -124,7 +127,7 @@ public class Start {
 					ts.addEntity(l,doc_id);	// add entity to list.
 					ts.addTriple(l,Triple.IS_A,"location",doc_id);
 				}
-*/				
+				
 				// Create Sentence instance
 				doc.addSentence(new Sentence(sent_id, line, words, tags));
 				
@@ -141,12 +144,13 @@ public class Start {
 		_modelSentIO.close();
 		_modelTokenIO.close();
 		_modelPosIO.close();
-/*		
-		_modelChunkerIO.close();
+		
+//		_modelChunkerIO.close();
+	
 		_modelNerPersonIO.close();
 		_modelNerLocationIO.close();
 		_modelNerOrganizationIO.close();
-*/
+
 		_sourceIO.close();
 
 		
