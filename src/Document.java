@@ -25,12 +25,6 @@ public class Document {
 		return _Sentences.add(sentence);
 	}
 	
-	public void process() {
-
-	}
-
-	
-	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("Document ID:%d: Sentences:%d\n", this._ID, _Sentences.size()));

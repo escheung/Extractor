@@ -1,4 +1,4 @@
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,13 +17,6 @@ public class TripleStore {
 	private Vector<Integer> _EntitySource;	// Origin document of the Entity (first appearance)
 	private int _TripleSize = 0;		// Initial number of Triples.
 	
-	// Base Predicate ID
-	/*
-	public static int IS_A = 1;
-	public static int PART_OF = 2;
-	public static int SAME_AS = 3;
-	*/
-	
 	public TripleStore () {
 		// Constructor
 		_Entity = new Vector<String>();
@@ -35,7 +28,6 @@ public class TripleStore {
 		_TripleSize = 0;
 		
 		// Add base entities
-//		addEntity("entity",-1);
 		addEntity("person",-1);
 		addEntity("organization",-1);
 		addEntity("location",-1);

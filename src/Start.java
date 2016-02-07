@@ -1,12 +1,7 @@
-
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -25,10 +20,6 @@ public class Start {
 		InputStream _modelSentIO = Start.class.getResourceAsStream(_config.getProperty("file.model.sentence"));
 		InputStream _modelTokenIO = Start.class.getResourceAsStream(_config.getProperty("file.model.token"));
 		InputStream _modelPosIO = Start.class.getResourceAsStream(_config.getProperty("file.model.pos"));
-/*
-		InputStream _modelChunkerIO = Start.class.getResourceAsStream(_config.getProperty("file.model.chunker"));
-		InputStream _modelParserIO = Start.class.getResourceAsStream(_config.getProperty("file.model.parser"));
-*/
 		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
 		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
 		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
@@ -38,7 +29,6 @@ public class Start {
 		int doc_id = 0;	// Document index/counter
 		String docText = null;
 		Vector<Document> documents = new Vector<Document>();  // A vector Documents
-		//Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO, _modelChunkerIO, _modelParserIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		TripleStore ts = new TripleStore();
 		
@@ -66,13 +56,7 @@ public class Start {
 				
 				if (sent_id==0) {
 					// First sentence in document; Look for Anchor Term.
-					// Use FSM to find basic Noun IS-A pattern.
-					/*
-					Triple triple = Sentence.fsm_Is_A(words, tags);
-					if (triple != null) {
-						ts.addTriple(triple, doc_id);
-						anchor = triple.getSubject();
-					}*/
+					// Use FSM to find basic Is-A pattern.
 					Vector<Triple> triples = Sentence.fsm_Is_A(words, tags);
 					if (triples.size()>0) {
 						Triple t = triples.get(0);
@@ -95,11 +79,6 @@ public class Start {
 							ts.addTriple(anchor, Triple.SAME_AS, n, doc_id);
 						}
 					}
-					
-					
-				} else {
-					// Use FSM to detect Pronoun IS-A pattern.
-					// TODO: make FSM.
 					
 				}
 				
@@ -134,7 +113,6 @@ public class Start {
 			}
 			
 			// Create document instance and add to vector of Documents. 
-			//doc = new Document(doc_id, sentences);
 			documents.add(doc);
 			doc_id++;	// Increment Doc index.
 		}
@@ -144,13 +122,9 @@ public class Start {
 		_modelSentIO.close();
 		_modelTokenIO.close();
 		_modelPosIO.close();
-		
-//		_modelChunkerIO.close();
-	
 		_modelNerPersonIO.close();
 		_modelNerLocationIO.close();
 		_modelNerOrganizationIO.close();
-
 		_sourceIO.close();
 
 		
@@ -168,16 +142,5 @@ public class Start {
 		
 		
 	}
-/*
-	private static String preprocess(String text) {
-		String line;
-		// Replace the LINE_SEPERATOR with " "
-		line = text.replaceAll(Engine.LINE_SEPERATOR, " ");
-		// Remove items in round brackets;
-		line = line.replaceAll("\\(.*?\\)","");
-//		line = Sentence.removeRoundBrackets(line);
-		
-		return line;
-	}
-*/
+
 }
