@@ -5,23 +5,24 @@ Requirements
 Linux/Windows OS, JAVA 1.7, Apache ANT.
   
 -------
-INSTALL
+Unpack
 -------
 Unzip the package
+- run "tar -zxvf Extractor.tar.gz" to unpack the file.
  
 -------
-COMPILE
+Compile
 -------
 Using ANT:
-- from a terminal, go into the "Extractor" folder.
+- from a terminal, go into the "Extractor" directory you just unpacked.
 - run "ant clean" to remove any previous compiled files.
 - run "ant build" to compile new set of class files.
 
----------
-EXECUTION
----------
+-------
+Execute
+-------
 Using ANT:
-- from a terminal, go into the "Extractor" folder.
+- from a terminal, go into the "Extractor" directory.
 - run "ant Start" to start execute the extraction application.
 - The outputs are stored in two files:
     - "cmput690w16a1_cheung.tsv" for the primary objective.
