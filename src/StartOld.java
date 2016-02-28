@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-public class Start {
+public class StartOld {
 
 	
 	private static Map<String, InputStream> _Streams;
@@ -24,21 +24,13 @@ public class Start {
 		
 		int doc_id = 0;	// Document index/counter
 		String docText = null;
-//		Vector<Document> documents = new Vector<Document>();  // A vector Documents
-
-		// Create Parsing Engine
+		Vector<Document> documents = new Vector<Document>();  // A vector Documents
+		//Engine engine = new Engine(_modelSentIO, _modelTokenIO, _modelPosIO,_modelNerPersonIO, _modelNerLocationIO, _modelNerOrganizationIO);
 		Engine engine = new Engine(_Streams);
-		// Create Triple Store
-//		TripleStore ts = new TripleStore();
+		TripleStore ts = new TripleStore();
 		
 		// Foreach Document in file;
 		while ((docText = br.readLine())!=null) {
-			// ask engine parse to document
-			engine.parseDocument(docText, doc_id);
-
-			
-/*			
-			
 			// Preprocess the document text.
 			docText = Document.preprocess(docText);
 			
@@ -65,7 +57,7 @@ public class Start {
 					Vector<Triple> triples = Sentence.fsm_Is_A(words, tags);
 					if (triples.size()>0) {
 						Triple t = triples.get(0);
-						if (t != null)anchor = t.getSubject();
+						if (t != null)anchor = t.getSubject();							
 						ts.addTriples(triples, doc_id);
 					}
 					// Process text between first set of commas.
@@ -119,15 +111,12 @@ public class Start {
 			
 			// Create document instance and add to vector of Documents. 
 			documents.add(doc);
-			
-*/
-			
 			doc_id++;	// Increment Doc index.
 		}
 		
-		engine.printTriples();
 		
-/*		
+		
+		
 		// ############
 		
 		PrintWriter writer1 = new PrintWriter(_config.getProperty("file.out.is_a"),"UTF-8");
@@ -139,7 +128,7 @@ public class Start {
 		writer2.close();
 		
 		// #############
-*/		
+		
 		cleanup();
 	}
 
@@ -148,22 +137,20 @@ public class Start {
 		
 		_Streams = new HashMap<String, InputStream>();
 		// Grab configuration file.
-		InputStream fileIO = Start.class.getResourceAsStream("config.properties");
+		InputStream fileIO = StartOld.class.getResourceAsStream("config.properties");
 		// Read Configuration File into Properties object.
 		
 		_config.load(fileIO);
 		
-		InputStream _sourceIO = Start.class.getResourceAsStream(_config.getProperty("file.data"));
-		InputStream _modelSentIO = Start.class.getResourceAsStream(_config.getProperty("file.model.sentence"));
-		InputStream _modelTokenIO = Start.class.getResourceAsStream(_config.getProperty("file.model.token"));
-		InputStream _modelPosIO = Start.class.getResourceAsStream(_config.getProperty("file.model.pos"));
-		InputStream _modelNerPersonIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
-		InputStream _modelNerLocationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
-		InputStream _modelNerOrganizationIO = Start.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
-		InputStream _predicatesIO = Start.class.getResourceAsStream(_config.getProperty("file.predicates"));
+		InputStream _sourceIO = StartOld.class.getResourceAsStream(_config.getProperty("file.data"));
+		InputStream _modelSentIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.sentence"));
+		InputStream _modelTokenIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.token"));
+		InputStream _modelPosIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.pos"));
+		InputStream _modelNerPersonIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.ner.person"));
+		InputStream _modelNerLocationIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.ner.location"));
+		InputStream _modelNerOrganizationIO = StartOld.class.getResourceAsStream(_config.getProperty("file.model.ner.organization"));
 		
 		_Streams.put("input.source", _sourceIO);
-		_Streams.put("input.predicates", _predicatesIO);
 		_Streams.put("model.sentence", _modelSentIO);
 		_Streams.put("model.token", _modelTokenIO);
 		_Streams.put("model.pos", _modelPosIO);

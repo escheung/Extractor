@@ -1,0 +1,2 @@
+is a	is a	subclass of  is a
+same as	is the same as	same as

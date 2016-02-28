@@ -3,20 +3,21 @@ public class Triple {
 
 	private String _Subject;
 	private String _Object;
-	private int _Predicate;
+	private String _Predicate;
 	
-	// Base Predicate ID
-	public static int IS_A = 1;
-	public static int PART_OF = 2;
-	public static int SAME_AS = 3;
+	public static String IS_A = "is a";
+	public static String SAME_AS = "same as";
+	public static String PERSON = "person";
+	public static String ORGANIZATION = "organization";
+	public static String LOCATION = "location";
 	
 	public Triple() {
 		_Subject = "";
 		_Object = "";
-		_Predicate = -1;
+		_Predicate = "";
 	}
 	
-	public Triple(String s, int p, String o) {
+	public Triple(String s, String p, String o) {
 		
 		_Subject = s;
 		_Predicate = p;
@@ -30,7 +31,7 @@ public class Triple {
 	public String getObject() {
 		return _Object;
 	}
-	public int getPredicate() {
+	public String getPredicate() {
 		return _Predicate;
 	}
 	
