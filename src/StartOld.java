@@ -43,8 +43,8 @@ public class StartOld {
 				if (sentText[sent_id] == null) continue;
 				if (sentText[sent_id].isEmpty()) continue;
 				
-				String line = Sentence.delStuffBtwCommas(sentText[sent_id]);
-				line = Sentence.delStuffBtwSingleQuote(line);
+				String line = SentenceOld.delStuffBtwCommas(sentText[sent_id]);
+				line = SentenceOld.delStuffBtwSingleQuote(line);
 				
 				// Tokenize each line
 				String[] words = engine.tokenize(line);
@@ -54,24 +54,24 @@ public class StartOld {
 				if (sent_id==0) {
 					// First sentence in document; Look for Anchor Term.
 					// Use FSM to find basic Is-A pattern.
-					Vector<Triple> triples = Sentence.fsm_Is_A(words, tags);
+					Vector<Triple> triples = SentenceOld.fsm_Is_A(words, tags);
 					if (triples.size()>0) {
 						Triple t = triples.get(0);
 						if (t != null)anchor = t.getSubject();							
 						ts.addTriples(triples, doc_id);
 					}
 					// Process text between first set of commas.
-					String btwCommas = Sentence.getStuffBtwCommas(sentText[sent_id]);
+					String btwCommas = SentenceOld.getStuffBtwCommas(sentText[sent_id]);
 					if (anchor!=null && !anchor.isEmpty()) {
 						String[] w = engine.tokenize(btwCommas);
 						String[] t = engine.tagging(w);
-						ts.addTriples(Sentence.fsm_Known_As(anchor,w,t),doc_id);
+						ts.addTriples(SentenceOld.fsm_Known_As(anchor,w,t),doc_id);
 					}
-					String btwSinglQuote = Sentence.getStuffBtwSingleQuote(sentText[sent_id]);
+					String btwSinglQuote = SentenceOld.getStuffBtwSingleQuote(sentText[sent_id]);
 					if (anchor!=null && !anchor.isEmpty()) {
 						String[] w = engine.tokenize(btwSinglQuote);
 						String[] t = engine.tagging(w);
-						String n = Sentence.getNounOnly(w,t);
+						String n = SentenceOld.getNounOnly(w,t);
 						if (!n.isEmpty()) {
 							ts.addTriple(anchor, Triple.SAME_AS, n, doc_id);
 						}
@@ -80,13 +80,13 @@ public class StartOld {
 				}
 				
 				// Finding football teams in "Plays/ed for" pattern
-				ts.addTriples(Sentence.fsm_Plays_For(words, tags),doc_id);
+				ts.addTriples(SentenceOld.fsm_Plays_For(words, tags),doc_id);
 				
 				// Finding football positions in "As A" pattern
-				ts.addTriples(Sentence.fsm_As_A(anchor, words, tags), doc_id);
+				ts.addTriples(SentenceOld.fsm_As_A(anchor, words, tags), doc_id);
 
 				// finding city in "City Of" pattern
-				ts.addTriples(Sentence.fsm_City_Of(words, tags),doc_id);
+				ts.addTriples(SentenceOld.fsm_City_Of(words, tags),doc_id);
 				
 				// Finding Base entities using NER
 				for (String p: engine.findPerson(words)) {
@@ -105,7 +105,7 @@ public class StartOld {
 				}
 				
 				// Create Sentence instance
-				doc.addSentence(new Sentence(sent_id, line, words, tags));
+				doc.addSentence(new SentenceOld(sent_id, line, words, tags));
 				
 			}
 			

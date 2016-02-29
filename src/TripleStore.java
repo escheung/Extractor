@@ -34,28 +34,57 @@ public class TripleStore {
 
 	}
 	
-	public void addTriple(Triple triple) {
+	public void addTriples(Vector<Triple> triples, int origin) {
+		if (triples==null) return;	// do nothing and return;
+		Iterator<Triple> it = triples.iterator();
+		while (it.hasNext()) {
+			addTriple(it.next(), origin);
+		}
+	}
+	
+	public void addTriple(Triple triple, int origin) {
 		
+		assert sanityCheck(): "addTriple(): Failed sanity check!";
+		if (triple == null) return;
+		this.addTriple(triple.getSubject(), triple.getPredicate(), triple.getObject(), origin);
 		
 	}
 	
 	public void addTriple(String s, String p, String o, int origin) {
 		int sid = addEntity(s);
-	//	int pid = addPredicate(s);
-		
+		int pid = getPredicateByLiteral(p);
+		int oid = addEntity(o);
+		System.out.println(String.format("Adding triple:%s/%d %s/%d %s/%d", s,sid,p,pid,o,oid));
+		this.addTriple(sid, pid, oid, origin);
 	}
 	
-	public void addTriple(int s, int p, int o, int origin) {
-		if (s < 0 || p < 0 || o < 0) return;	// not valid input.
-		_Subject.add(s);
-		_Predicate.add(p);
-		_Object.add(o);
+	public void addTriple(int sid, int pid, int oid, int origin) {
+		if (sid < 0 || pid < 0 || oid < 0) return;	// not valid input.
+		_Subject.add(sid);
+		_Predicate.add(pid);
+		_Object.add(oid);
 		_Origin.add(origin);
 	}
 	
 	public int getSize() {
 		assert sanityCheck(): "getSize(): Failed sanity check!";
 		return _Subject.size();
+	}
+	
+	public boolean subjectHasType(String subject, String object) {
+		// return true if subject is defined in triple store as a 'person'.
+		if (subject==null || object==null) return false;
+		if (subject.isEmpty() || object.isEmpty()) return false;
+		int sid = this.getEntityByLiteral(subject);
+		int pid = this.getPredicateByLiteral(Triple.IS_A);
+		int oid = this.getEntityByLiteral(object);
+		
+		for (int i=0; i<this._Subject.size(); i++) {
+			if (_Subject.get(i)==sid && _Predicate.get(i)==pid && _Object.get(i)==oid) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public int addEntity(String literal) {
@@ -70,8 +99,8 @@ public class TripleStore {
 	
 	public int addPredicate(String literal, String desc, String mapTo) {
 		// Add predicate literal; do nothing if already exist,
-		if (literal == null) return -1;
-		if (literal.isEmpty()) return -1;
+		if (literal == null || desc == null || mapTo == null) return -1;
+		if (literal.isEmpty() || desc.isEmpty() || mapTo.isEmpty()) return -1;
 		if (_PredicateLiteral.indexOf(literal)<0) {	// check if predicate already exists.
 			_PredicateLiteral.add(literal);
 			_PredicateDesc.add(desc);
@@ -108,8 +137,11 @@ public class TripleStore {
 		assert(sanityCheck());
 		StringBuilder sb = new StringBuilder();
 		for (int i=0; i < this._Predicate.size(); i++) {
-			sb.append(String.format("%s %s %s : %d\n", 
-					this.getEntityById(_Subject.get(i)), this.getPredicateById(_Predicate.get(i)),this.getEntityById(_Object.get(i)),_Origin.get(i))); 			
+			sb.append(String.format("%s\t%s\t%s\t%d\n", 
+					this.getEntityById(_Subject.get(i)), 
+					this.getPredicateById(_Predicate.get(i)),
+					this.getEntityById(_Object.get(i)),
+					_Origin.get(i)));
 		}
 		return sb.toString();
 	}

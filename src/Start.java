@@ -178,6 +178,7 @@ public class Start {
 	private static void cleanup() throws Exception {
 		
 		_Streams.get("input.source").close();
+		_Streams.get("input.predicates").close();
 		_Streams.get("model.sentence").close();
 		_Streams.get("model.token").close();
 		_Streams.get("model.pos").close();

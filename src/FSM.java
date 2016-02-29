@@ -1,34 +1,9 @@
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
-public class Sentence {
-
-	private String _Text;
-	private int _ID;
-	private String[] _Tags;
-	private String[] _Words;
-	
-	public Sentence (int id, String text, String[] words, String[] tags) {
-		// Constructor;
-		_Text = text;
-		_ID = id;
-		_Words = words.clone();
-		_Tags = tags.clone();
-	}
-	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append('\n'+_Text+'\n');
-		sb.append("Words\n");
-		sb.append(Arrays.toString(_Words));
-		sb.append("\nTags\n");
-		sb.append(Arrays.toString(_Tags));
-		return sb.toString();
-	}
-	
-	public int getID() {
-		return _ID;
-	}
+public class FSM {
 	
 	public static String delStuffBtwSingleQuote(String text) {
 		String line = text;
@@ -77,18 +52,134 @@ public class Sentence {
 		return noun.toString();
 	}
 	
-	public static Vector<Triple> fsm_Plays_For(String[] words, String[] tags) {
-		// This FSM tries to find the Plays-For pattern.
+	public static Map<String,Object> findBornIn(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the Born-In pattern.
 		Vector<Triple> triples = new Vector<Triple>();
-		String subject = "";
+		String object = "";
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
 		
 		while (index < words.length) {
 			switch (state) {
 			case 0:
-				if (words[index].matches("^plays|played$")) {
+				if (words[index].matches("^born|Born$")) {
+					state = 1;	// go to state 1.
+				} else {
+					state = 0;	// otherwise; stays here.
+				}
+				break;
+			case 1:
+				if (words[index].matches("^in$")) {
+					state = 2;	// go to state 2.
+				} else {
+					state = 4;	// otherwise; go to end.
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*|JJ.*$")) {
+					state = 3;	// go to state 2.
+					object = object.concat(words[index]);	// add noun to object.
+				} else if (tags[index].matches("^DT.*$")) {
+					state = 2;	// stay here.
+				} else {
+					state = 4;	// go to end.
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*|JJ.*$")) {
+					state = 3;
+					object = object.concat(" "+words[index]);	// add noun to object.
+				} else {
+					state = 4;	// the end.
+				}
+				break;
+			case 4:
+				break;
+			default:
+				break;
+			}
+			index++;
+		}
+		
+		if (!object.isEmpty() && !subject.isEmpty()) {
+			triples.add(new Triple(object,Triple.IS_A,"location"));
+			triples.add(new Triple(subject,"born in",object));
+		};
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",object);
+		m.put("triples",triples);
+		return m;
+	}
+	
+	public static Map<String,Object> findPlayedAgainst(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the Plays-Against pattern.
+		Vector<Triple> triples = new Vector<Triple>();
+		String object = "";
+		int state = 0;	// state index.
+		int index = 0;	// word index in sentence.
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].matches("^against$")) {
+					state = 1;	// go to state 1.
+				} else {
+					state = 0;	// otherwise; stays here.
+				}
+				break;
+			case 1:
+				if (tags[index].matches("^NN.*|JJ.*$")) {
+					state = 2;	// go to state 2.
+					object = object.concat(words[index]);	// add noun to object.
+				} else {
+					state = 1;	// stay here.
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*|JJ.*$")) {
+					state = 2;
+					object = object.concat(" "+words[index]);	// add noun to object.
+				} else {
+					state = 3;	// the end.
+				}
+				break;
+			case 3:
+				break;
+			default:
+				break;
+			}
+			index++;
+		}
+		
+		if (!object.isEmpty() && !subject.isEmpty()) {
+			triples.add(new Triple(object,Triple.IS_A,"football_team"));
+			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(subject,"played against",object));
+		}
+		
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",object);
+		m.put("triples",triples);
+		return m;
+	}
+	
+	public static Map<String,Object> findPlaysFor(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the Plays-For pattern.
+		Vector<Triple> triples = new Vector<Triple>();
+		String object = "";
+		int state = 0;	// state index.
+		int index = 0;	// word index in sentence.
+		String pred = "";
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].matches("^plays|playing|played$")) {
 					state = 1;	// found the word "plays"; go to state 1.
+					pred = "played for";
+				} else if (words[index].matches("^debut|debuted$")) {
+					state = 1;
+					pred = "debuted for";
 				} else {
 					state = 0;	// otherwise; stays here.
 				}
@@ -102,7 +193,7 @@ public class Sentence {
 				break;
 			case 2:
 				if (tags[index].matches("^NN.*|JJ.*$")) {	// found a noun or adjective
-					subject = subject.concat(words[index]);	// add noun to object.
+					object = object.concat(words[index]);	// add noun to object.
 					state = 3;	// go to state 3;
 				} else {
 					state = 4;	// unexpected word. go to state 4;
@@ -110,7 +201,7 @@ public class Sentence {
 				break;
 			case 3:
 				if (tags[index].matches("^NN.*")) {
-					subject = subject.concat(" " + words[index]);	// add noun to object.
+					object = object.concat(" " + words[index]);	// add noun to object.
 					state = 3;	// found a noun, add to object;
 				} else {
 					state = 4;	// no more noun. go to state 4;
@@ -123,15 +214,77 @@ public class Sentence {
 			index++;
 		}
 		
-		if (!subject.isEmpty()) {
-			triples.add(new Triple(subject,Triple.IS_A,"football_team"));
-			triples.add(new Triple(subject,Triple.IS_A,"organization"));
+		if (!object.isEmpty() && !subject.isEmpty()) {
+			triples.add(new Triple(object,Triple.IS_A,"football_team"));
+			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(subject,pred,object));
 		}
 		
-		return triples;
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",object);
+		m.put("triples",triples);
+		return m;
+		//return triples;
 	}
 	
-	public static Vector<Triple> fsm_City_Of(String[] words, String[] tags) {
+	public static Map<String,Object> findStartedAt(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the Started-At pattern.
+		Vector<Triple> triples = new Vector<Triple>();
+		String object = "";
+		int state = 0;	// state index.
+		int index = 0;	// word index in sentence.
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].matches("started")) {
+					state = 1;	// found the word "plays"; go to state 1.
+				} else {
+					state = 0;	// otherwise; stays here.
+				}
+				break;
+			case 1:
+				if (words[index].matches("^at|with$")) {
+					state = 2;	// found the word "at|with"; go to state 2;
+				} else {
+					state = 1;	// stay here
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*$")) {	// found a noun or adjective
+					object = object.concat(words[index]);	// add noun to object.
+					state = 3;	// go to state 3;
+				} else if (tags[index].matches("^DT.*$")) {	// determiner, such as "the/a".
+					state = 2;	// stay here.
+				} else {
+					state = 4;	// unexpected word. go to state 4;
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*")) {
+					object = object.concat(" " + words[index]);	// add noun to object.
+					state = 3;	// found a noun, add to object;
+				} else {
+					state = 4;	// no more noun. go to state 4;
+				}
+				break;
+			default:
+				break;
+			}
+			index++;
+		}
+		
+		if (!object.isEmpty() && !subject.isEmpty()) {
+			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(subject,"started at",object));
+		}
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",object);
+		m.put("triples",triples);
+		return m;
+	}
+	
+	public static Vector<Triple> findCityOf(String[] words, String[] tags) {
 		// This FSM tries to find the "City Of" pattern to discover city names.
 		Vector<Triple> triples = new Vector<Triple>();
 		String subject = "";
@@ -194,9 +347,146 @@ public class Sentence {
 		}
 		return triples;
 	}
-	
-	public static Vector<Triple> fsm_As_A(String subject, String[] words, String[] tags) {
+
+	public static Map<String, Object> findLivedIn(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the "lived in"  pattern.
+				Vector<Triple> triples = new Vector<Triple>();
+				String object = "";
+				int state = 0;
+				int index = 0;
+				boolean found = false;	// flag for finding an object.
+				
+				while (index < words.length) {
+					switch (state) {
+					case 0:
+						if (words[index].equalsIgnoreCase("lived")) {
+							state = 1;	// "lived"
+						} else {
+							state = 0;	// stay here.
+						}
+						break;
+					case 1:
+						if (words[index].equalsIgnoreCase("in")) {
+							state = 2;	// "in"
+						} else {
+							state = 1;	// stay here.
+						}
+						break;
+					case 2:
+						if (tags[index].matches("^NN.*")) {
+							// noun found
+							object = object.concat(words[index]);	// add word to object string.
+							found = true;
+							state = 3;	// go to 3.
+						} else if (tags[index].matches("^DT.*")) {	// if 
+							state = 2;	// stay here
+						} else {
+							state = 4;
+						}
+						break;
+					case 3:
+						if (tags[index].matches("^NN.*")) {
+							// noun
+							object = object.concat(" "+words[index]); // add word to object string
+							found = true;
+							state = 3;
+						} else {
+							state = 4;	// end state.
+						}
+						break;
+					case 4:	// end state
+						break;	
+					default:
+						break;
+					}
+				
+					index++;
+				}
+				
+				if (found || (index>=words.length && !object.isEmpty())) {
+					// add triple to vector
+					triples.add(new Triple(subject,"lived in",object));
+					System.out.println("******** Found Lived-In"+subject+" "+object);
+				}
+				
+				Map<String, Object> m = new HashMap<String, Object>();
+				m.put("mention",object);
+				m.put("triples",triples);
+				return m;
 		
+	}
+	
+	public static Map<String, Object> findFoundedBy(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the "Founded-By"  pattern.
+		Vector<Triple> triples = new Vector<Triple>();
+		String object = "";
+		int state = 0;
+		int index = 0;
+		boolean found = false;	// flag for finding an object.
+		
+		while (index < words.length) {
+			switch (state) {
+			case 0:
+				if (words[index].equalsIgnoreCase("founded")) {
+					// "founded"
+					state = 1;
+				} else {
+					state = 0;	// stay here.
+				}
+				break;
+			case 1:
+				if (words[index].equalsIgnoreCase("by")) {
+					// "by"
+					state = 2;
+				} else {
+					state = 1;	// stay here.
+				}
+				break;
+			case 2:
+				if (tags[index].matches("^NN.*")) {
+					// noun found
+					object = object.concat(words[index]);	// add word to object string.
+					found = true;
+					state = 3;	// go to 3.
+				} else if (tags[index].matches("^DT.*")) {
+					// stay
+					state = 2;
+				} else {
+					state = 4;
+				}
+				break;
+			case 3:
+				if (tags[index].matches("^NN.*")) {
+					// noun
+					object = object.concat(" "+words[index]); // add word to object string
+					found = true;
+					state = 3;
+				} else {
+					state = 4;	// end state.
+				}
+				break;
+			case 4:	// end state
+				break;	
+			default:
+				break;
+			}
+		
+			index++;
+		}
+		
+		if (found || (index>=words.length && !object.isEmpty())) {
+			// add triple to vector
+			triples.add(new Triple(subject,"founded by",object));
+			found = false;	// reset flag.
+		}
+		
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",object);
+		m.put("triples",triples);
+		return m;
+	}
+	
+	public static Map<String, Object> findAsAPosition(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "As-A" position pattern.
 		Vector<Triple> triples = new Vector<Triple>();
 		String object = "";
@@ -281,16 +571,19 @@ public class Sentence {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				triples.add(new Triple(subject,Triple.IS_A,object));
+				triples.add(new Triple(subject,"played as",object));
 				triples.add(new Triple(object,Triple.IS_A,"position"));
 				object= "";	// reset subject.
 				found = false;	// reset flag.
 			}
 		}
-		return triples;
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",subject);
+		m.put("triples",triples);
+		return m;
 	}
 	
-	public static Vector<Triple> fsm_Known_As(String subject, String[] words, String[] tags) {
+	public static Vector<Triple> findKnownAs(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "Known-As" pattern.
 		Vector<Triple> triples = new Vector<Triple>();
 		String object = "";
@@ -402,7 +695,8 @@ public class Sentence {
 		return triples;
 	}
 
-	public static Vector<Triple> fsm_Is_A(String[] words, String[] tags) {
+	//public static Vector<Triple> findIsA(String[] words, String[] tags) {
+	public static Map<String, Object> findIsA(String[] words, String[] tags) {
 		// This FSM tries to find the IS-A pattern.
 		Vector<Triple> triples = new Vector<Triple>();
 		boolean success = false;
@@ -494,14 +788,18 @@ public class Sentence {
 		
 		if (success) {
 			triples.add(new Triple(subject,Triple.IS_A,object));
-			if (object.equals("footballer")) {	// a footballer is a person.
+			if (object.contains("footballer")) {	// a footballer is a person.
 				triples.add(new Triple(subject,Triple.IS_A,"person"));
+				triples.add(new Triple(subject,"played", "football"));
 				if (!keyJJ.isEmpty()) {	// a key adjective is found; likely nationality.
 					triples.add(new Triple(keyJJ,Triple.IS_A,"nationality"));
 				}
 			}
 		}
-		return triples;
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention",subject);
+		m.put("triples", triples);
+		return m;
 	}
 
 }

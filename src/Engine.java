@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Vector;
 
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
@@ -75,39 +76,94 @@ public class Engine {
 		String anchorTerm = "";	//Anchor term for document; usually first noun found.
 //		int predicate_IS_A = ts.addPredicate("is_a"); 
 		for (int sid=0; sid < sentence.length; sid++) {	// for each sentence
+			
 			if (sentence[sid] == null) continue;	// skip if line is empty
 			if (sentence[sid].isEmpty()) continue;	// skip if line is empty
-			String cleaned = this.delStuffBtwCommas(sentence[sid]);
-			cleaned = this.delStuffBtwSingleQuote(cleaned);
 			
+			String noCommas = this.delStuffBtwCommas(sentence[sid]);
+			String noQuotes = this.delStuffBtwSingleQuote(sentence[sid]);
+			String noCommasQuotes = this.delStuffBtwSingleQuote(noCommas);
 			// Tokenize line
-			String[] token = this.tokenize(cleaned);
+			String[] token = this.tokenize(sentence[sid]);
 			// Apply POS tag
-			String[] tag = this.tagging(token);
+			//String[] tag = this.tagging(token);
+			
 			
 			// Parse sentences
 			if (sid == 0) {
-				// Parse first sentence differently.				
+				// Parse first sentence differently.
+				// Look for Anchor Term; and add triples to triple store.
 				
-
-
-				
-			}
+				anchorTerm = parseFirstSentence(noCommasQuotes,docID);
+			};
 			
-			// Parse other sentences			
+			// Parse each sentences
+			
+			parseSentence(noQuotes, anchorTerm, docID);
+			
+			// Use NER classifier to find person, organization, and location.
 			parseForPerson(token, docID);
-
 			parseForOrganization(token, docID);
-			
 			parseForLocation(token, docID);
 			
 		}
 		
 	}
 	
-	public void parseFirstSentence(TripleStore ts) {
+	public String parseFirstSentence(String sentence, int did) {
+		// parse first sentence; add triples to triple-store and return anchor terms.
+		String anchor = "";	// anchor term.
+		String[] _token = this.tokenize(sentence);
+		String[] _tag = this.tagging(_token);
 		
+		//Vector<Triple> triples = FSM.findIsA(_token, _tag);
+		Map<String, Object> m = FSM.findIsA(_token, _tag);
+		Vector<Triple> triples = (Vector<Triple>)m.get("triples");
+		if (triples.size()>0) {
+			anchor = (String)m.get("mention");
+			ts.addTriples(triples, did);
+		}
+		return anchor;
 	}
+	
+	public void parseSentence(String sentence, String anchor, int did) {
+		String lastMention = anchor;
+		
+		String[] _token = this.tokenize(sentence);
+		String[] _tag = this.tagging(_token);
+		// if the mention is a person.
+		//if (ts.subjectHasType(lastMention,Triple.PERSON)) {
+		
+		Map<String, Object> map;
+
+		if (ts.subjectHasType(anchor,Triple.PERSON)) {
+			// played as a position
+			map = FSM.findAsAPosition(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// played for a club
+			map = FSM.findPlaysFor(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// started at a club
+			map = FSM.findStartedAt(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// Played against
+			map = FSM.findPlayedAgainst(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// Born in
+			map = FSM.findBornIn(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+		}
+		
+		// Founded by
+		map = FSM.findFoundedBy(anchor, _token, _tag);
+		ts.addTriples((Vector<Triple>)map.get("triples"), did);
+		lastMention = (String)map.get("mention");
+		// Lived in
+		map = FSM.findLivedIn(lastMention, _token, _tag);
+		ts.addTriples((Vector<Triple>)map.get("triples"), did);
+
+	}
+
 	
 	public void parseForPerson(String[] token, int did) {
 		// Use NER to find the Person.
