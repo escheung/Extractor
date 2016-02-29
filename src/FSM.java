@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Vector;
 
 public class FSM {
+	public static String IS_A = "isA";
+	public static String SAME_AS = "sameAs";
 	
 	public static String delStuffBtwSingleQuote(String text) {
 		String line = text;
@@ -102,7 +104,7 @@ public class FSM {
 		}
 		
 		if (!object.isEmpty() && !subject.isEmpty()) {
-			triples.add(new Triple(object,Triple.IS_A,"location"));
+			triples.add(new Triple(object,FSM.IS_A,"location"));
 			triples.add(new Triple(subject,"born in",object));
 		};
 		Map<String, Object> m = new HashMap<String, Object>();
@@ -152,8 +154,8 @@ public class FSM {
 		}
 		
 		if (!object.isEmpty() && !subject.isEmpty()) {
-			triples.add(new Triple(object,Triple.IS_A,"football_team"));
-			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(object,FSM.IS_A,"football_team"));
+			triples.add(new Triple(object,FSM.IS_A,"organization"));
 			triples.add(new Triple(subject,"played against",object));
 		}
 		
@@ -215,8 +217,8 @@ public class FSM {
 		}
 		
 		if (!object.isEmpty() && !subject.isEmpty()) {
-			triples.add(new Triple(object,Triple.IS_A,"football_team"));
-			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(object,FSM.IS_A,"football_team"));
+			triples.add(new Triple(object,FSM.IS_A,"organization"));
 			triples.add(new Triple(subject,pred,object));
 		}
 		
@@ -275,7 +277,7 @@ public class FSM {
 		}
 		
 		if (!object.isEmpty() && !subject.isEmpty()) {
-			triples.add(new Triple(object,Triple.IS_A,"organization"));
+			triples.add(new Triple(object,FSM.IS_A,"organization"));
 			triples.add(new Triple(subject,"started at",object));
 		}
 		Map<String, Object> m = new HashMap<String, Object>();
@@ -341,8 +343,8 @@ public class FSM {
 			index++;
 			if (index >= words.length && !subject.isEmpty()) {
 				// reached end of sentence and found subject.
-				triples.add(new Triple(subject,Triple.IS_A,"city"));
-				triples.add(new Triple(subject,Triple.IS_A,"location"));
+				triples.add(new Triple(subject,FSM.IS_A,"city"));
+				triples.add(new Triple(subject,FSM.IS_A,"location"));
 			}
 		}
 		return triples;
@@ -406,7 +408,6 @@ public class FSM {
 				if (found || (index>=words.length && !object.isEmpty())) {
 					// add triple to vector
 					triples.add(new Triple(subject,"lived in",object));
-					System.out.println("******** Found Lived-In"+subject+" "+object);
 				}
 				
 				Map<String, Object> m = new HashMap<String, Object>();
@@ -571,8 +572,8 @@ public class FSM {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				triples.add(new Triple(subject,"played as",object));
-				triples.add(new Triple(object,Triple.IS_A,"position"));
+				triples.add(new Triple(subject,"playedAs",object));
+				triples.add(new Triple(object,FSM.IS_A,"position"));
 				object= "";	// reset subject.
 				found = false;	// reset flag.
 			}
@@ -583,15 +584,16 @@ public class FSM {
 		return m;
 	}
 	
-	public static Vector<Triple> findKnownAs(String subject, String[] words, String[] tags) {
+	//public static Vector<Triple> findKnownAs(String subject, String[] words, String[] tags) {
+	public static Map<String, Object> findKnownAs(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "Known-As" pattern.
 		Vector<Triple> triples = new Vector<Triple>();
 		String object = "";
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
 		boolean found = false;	// flag for finidng an object.
-		if (subject == null) return triples;	// return empty triple vector;
-		if (subject.isEmpty()) return triples;	// return empty triple vector;
+//		if (subject == null) return triples;	// return empty triple vector;
+//		if (subject.isEmpty()) return triples;	// return empty triple vector;
 		
 		while (index < words.length) {
 			switch (state) {
@@ -599,7 +601,7 @@ public class FSM {
 				if (tags[index].matches("^RB.*")) {
 					state = 0;	// found adverb ; go to next state;
 				} else if (words[index].equals("known")) {
-					state = 1;	// found "known"; go to state 8;
+					state = 1;	// found "known"; go to state 1
 				} else {
 					state = 7;	// unexpected word; go to end state;
 				}
@@ -676,8 +678,7 @@ public class FSM {
 				}
 				break;
 			case 7:
-				// end of FSM.
-				break;
+				break;	// end of FSM.
 			default:
 				break;
 			}
@@ -686,16 +687,21 @@ public class FSM {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				triples.add(new Triple(subject,Triple.SAME_AS,object));
+				triples.add(new Triple(subject,FSM.SAME_AS,object));
 				object = "";	// reset object.
 				found = false;	// reset flag.
+				
+				System.out.println("triple.size() "+triples.size());
 			}
 		}
 		
-		return triples;
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("mention", subject);
+		m.put("triples", triples);
+		return m;
+		//return triples;
 	}
 
-	//public static Vector<Triple> findIsA(String[] words, String[] tags) {
 	public static Map<String, Object> findIsA(String[] words, String[] tags) {
 		// This FSM tries to find the IS-A pattern.
 		Vector<Triple> triples = new Vector<Triple>();
@@ -787,12 +793,12 @@ public class FSM {
 		}
 		
 		if (success) {
-			triples.add(new Triple(subject,Triple.IS_A,object));
+			triples.add(new Triple(subject,FSM.IS_A,object));
 			if (object.contains("footballer")) {	// a footballer is a person.
-				triples.add(new Triple(subject,Triple.IS_A,"person"));
-				triples.add(new Triple(subject,"played", "football"));
+				triples.add(new Triple(subject,FSM.IS_A,"person"));
+				//triples.add(new Triple(subject,"played", "football"));
 				if (!keyJJ.isEmpty()) {	// a key adjective is found; likely nationality.
-					triples.add(new Triple(keyJJ,Triple.IS_A,"nationality"));
+					triples.add(new Triple(keyJJ,FSM.IS_A,"nationality"));
 				}
 			}
 		}

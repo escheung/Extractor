@@ -1,11 +1,14 @@
-is a	is a	subclass of  is a
-same as	is the same as	same as
-played	played a <sport>	played
-played as	as a <position>	played as
-played for	<player> plays/played for <organization>	played for
-debuted for	<player> debuted for <organization>	played for
+isA	... is a ...	isA
+sameAs	assoicate two objects having the same meaning	sameAs
+knownAs	... is known as ...	sameAs
+played	played the sport of <object>	played
+playedPosition	associate a player to a field position they have taken	playedPosition
+playedAs	<player> ... as a ... <field position>	playedPosition
+playedInTeam	assocate a player to a team as a player	playedInTeam
+played for	... plays/played for ...	playedInTeam
+debuted for	... debuted for ...	playedInTeam
 founded by	<subject> founded by <object>	founded by
 lived in	<subject> lived in <object>	lived in
-started at	<subject> started at <organization>	played for
+started at	<subject> started at <organization>	playedInTeam
 played against	<player> played against <organization>	played against
 born in	<subject> born in <location>	born in

@@ -1,6 +1,8 @@
 //import java.util.Arrays;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 
@@ -76,7 +78,7 @@ public class TripleStore {
 		if (subject==null || object==null) return false;
 		if (subject.isEmpty() || object.isEmpty()) return false;
 		int sid = this.getEntityByLiteral(subject);
-		int pid = this.getPredicateByLiteral(Triple.IS_A);
+		int pid = this.getPredicateByLiteral(FSM.IS_A);
 		int oid = this.getEntityByLiteral(object);
 		
 		for (int i=0; i<this._Subject.size(); i++) {
@@ -133,6 +135,17 @@ public class TripleStore {
 			_Object.size() == _Origin.size());
 	}
 	
+	public Vector<Integer> getListOfOrigin(int pid) {
+		// generate a list of document source based on given predicate id.
+		Vector<Integer> src = new Vector<Integer>();
+		for (int i=0; i < this._Predicate.size(); i++) {
+			if (this._Predicate.get(i)==pid) {	
+				src.add(this._Origin.get(i));
+			}
+		}
+		return src;
+	}
+	
 	public String generateTriplesOutput() {
 		assert(sanityCheck());
 		StringBuilder sb = new StringBuilder();
@@ -144,5 +157,44 @@ public class TripleStore {
 					_Origin.get(i)));
 		}
 		return sb.toString();
+	}
+	
+	public String generatePredicateFrequency() {
+		assert(sanityCheck());
+		StringBuilder sb = new StringBuilder();
+		
+		// get unique mappings of parent predicates
+		Set<Integer> uniqueMapTo = new LinkedHashSet<Integer>();
+		uniqueMapTo.addAll(this._PredicateMapTo);	// unique ordered set of mapped to predicate 
+		
+		for (Integer mapId : uniqueMapTo) {
+		    System.out.println(String.format("Relationship: %s", this._PredicateLiteral.get(mapId)));
+			// find child predicates
+		    for (int i=0; i < _PredicateLiteral.size(); i++) {
+		    	if (this._PredicateMapTo.get(i) == mapId) {
+		    		Vector<Integer> origins = this.getListOfOrigin(i);
+		    		System.out.println(String.format("Pid:%d\tDesc:%s\tFreq:%d", i,this._PredicateDesc.get(i),origins.size()));
+		    		System.out.println(Arrays.toString(origins.toArray()));
+		    	}
+		    	
+		    }
+		}
+		
+		return sb.toString();
+	}
+	
+	public void printPredicates() {
+		
+		for (int i=0; i < this._PredicateLiteral.size(); i++) {
+			
+			System.out.println(
+					String.format("%d|%s\t%d", 
+							i,
+							this._PredicateLiteral.get(i)
+							,this._PredicateMapTo.get(i)
+					));
+			
+		}
+		
 	}
 }

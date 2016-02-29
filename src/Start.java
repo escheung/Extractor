@@ -36,7 +36,6 @@ public class Start {
 			// ask engine parse to document
 			engine.parseDocument(docText, doc_id);
 
-			
 /*			
 			
 			// Preprocess the document text.
@@ -126,6 +125,7 @@ public class Start {
 		}
 		
 		engine.printTriples();
+		engine.getPredicateResult();
 		
 /*		
 		// ############

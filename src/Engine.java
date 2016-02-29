@@ -53,7 +53,8 @@ public class Engine {
 		//ts.addPredicate(Triple.IS_A);
 		parsePredicateFile(streams.get("input.predicates"));
 		
-
+		// print predicates
+		ts.printPredicates();
 	}
 	public void parsePredicateFile(InputStream stream) throws Exception {
 		
@@ -81,7 +82,7 @@ public class Engine {
 			if (sentence[sid].isEmpty()) continue;	// skip if line is empty
 			
 			String noCommas = this.delStuffBtwCommas(sentence[sid]);
-			String noQuotes = this.delStuffBtwSingleQuote(sentence[sid]);
+			//String noQuotes = this.delStuffBtwSingleQuote(sentence[sid]);
 			String noCommasQuotes = this.delStuffBtwSingleQuote(noCommas);
 			// Tokenize line
 			String[] token = this.tokenize(sentence[sid]);
@@ -94,12 +95,12 @@ public class Engine {
 				// Parse first sentence differently.
 				// Look for Anchor Term; and add triples to triple store.
 				
-				anchorTerm = parseFirstSentence(noCommasQuotes,docID);
+				anchorTerm = parseFirstSentence(sentence[sid],docID);
 			};
 			
 			// Parse each sentences
 			
-			parseSentence(noQuotes, anchorTerm, docID);
+			parseSentence(this.delStuffBtwSingleQuote(sentence[sid]), anchorTerm, docID);
 			
 			// Use NER classifier to find person, organization, and location.
 			parseForPerson(token, docID);
@@ -113,7 +114,11 @@ public class Engine {
 	public String parseFirstSentence(String sentence, int did) {
 		// parse first sentence; add triples to triple-store and return anchor terms.
 		String anchor = "";	// anchor term.
-		String[] _token = this.tokenize(sentence);
+		String noCommas = this.delStuffBtwCommas(sentence);
+		String noQuotes = this.delStuffBtwSingleQuote(sentence);
+		String noCommasQuotes = this.delStuffBtwSingleQuote(noCommas);
+		
+		String[] _token = this.tokenize(noCommasQuotes);
 		String[] _tag = this.tagging(_token);
 		
 		//Vector<Triple> triples = FSM.findIsA(_token, _tag);
@@ -122,7 +127,16 @@ public class Engine {
 		if (triples.size()>0) {
 			anchor = (String)m.get("mention");
 			ts.addTriples(triples, did);
+		
 		}
+		// Known As
+		if (anchor!=null && !anchor.isEmpty()) {
+			String[] _token2 = this.tokenize(this.getStuffBtwCommas(sentence));
+			String[] _tag2 = this.tagging(_token2);
+			Map<String, Object> m2 = FSM.findKnownAs(anchor, _token2, _tag2);
+			ts.addTriples((Vector<Triple>)m2.get("triples"), did);
+		}
+		
 		return anchor;
 	}
 	
@@ -153,9 +167,9 @@ public class Engine {
 			map = FSM.findBornIn(anchor, _token, _tag);
 			ts.addTriples((Vector<Triple>)map.get("triples"), did);
 		}
-		
+
 		// Founded by
-		map = FSM.findFoundedBy(anchor, _token, _tag);
+		map = FSM.findFoundedBy(lastMention, _token, _tag);
 		ts.addTriples((Vector<Triple>)map.get("triples"), did);
 		lastMention = (String)map.get("mention");
 		// Lived in
@@ -169,7 +183,7 @@ public class Engine {
 		// Use NER to find the Person.
 		for (String aPerson: this.findPerson(token)) {
 			int s = ts.addEntity(aPerson);
-			int p = ts.getPredicateByLiteral(Triple.IS_A);
+			int p = ts.getPredicateByLiteral(FSM.IS_A);
 			int o = ts.getEntityByLiteral(Triple.PERSON);
 			ts.addTriple(s, p, o, did);
 		}
@@ -178,7 +192,7 @@ public class Engine {
 		// Use NER to find the Organization
 		for (String anOrg: this.findOrganization(token)) {
 			int s = ts.addEntity(anOrg);
-			int p = ts.getPredicateByLiteral(Triple.IS_A);
+			int p = ts.getPredicateByLiteral(FSM.IS_A);
 			int o = ts.getEntityByLiteral(Triple.ORGANIZATION);
 			ts.addTriple(s, p, o, did);
 		}
@@ -187,7 +201,7 @@ public class Engine {
 		// Use NER to find the locations
 		for (String aLocation: this.findLocation(token)) {
 			int s = ts.addEntity(aLocation);
-			int p = ts.getPredicateByLiteral(Triple.IS_A);
+			int p = ts.getPredicateByLiteral(FSM.IS_A);
 			int o = ts.getEntityByLiteral(Triple.LOCATION);
 			ts.addTriple(s, p, o, did);
 		}
@@ -285,4 +299,13 @@ public class Engine {
 		
 		System.out.print(ts.generateTriplesOutput());
 	}
+	
+	public String getPredicateResult() {
+		
+		return (ts.generatePredicateFrequency());
+		
+		
+	}
 }
+
+
