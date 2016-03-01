@@ -179,7 +179,7 @@ public class TripleStore {
 		    	if (this._PredicateMapTo.get(i) == mapId) {
 		    		Vector<Integer> origins = this.getListOfOrigin(i);
 		    		if (origins.size()>0) {
-		    			sb.append(String.format("Pattern: %s\nDescription: %s\nFrequency: %d\n",
+		    			sb.append(String.format("Pattern: \"%s\"\nDescription: %s\nFrequency: %d\n",
 		    					this._PredicateLiteral.get(i),
 		    					this._PredicateDesc.get(i),
 		    					origins.size()));
