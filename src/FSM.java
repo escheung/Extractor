@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Vector;
 
 public class FSM {
-	public static String IS_A = "isA";
-	public static String SAME_AS = "sameAs";
+	public static String IS_A = "is a";
+	//public static String SAME_AS = "sameAs";
 	
 	public static String delStuffBtwSingleQuote(String text) {
 		String line = text;
@@ -171,17 +171,12 @@ public class FSM {
 		String object = "";
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
-		String pred = "";
 		
 		while (index < words.length) {
 			switch (state) {
 			case 0:
 				if (words[index].matches("^plays|playing|played$")) {
 					state = 1;	// found the word "plays"; go to state 1.
-					pred = "played for";
-				} else if (words[index].matches("^debut|debuted$")) {
-					state = 1;
-					pred = "debuted for";
 				} else {
 					state = 0;	// otherwise; stays here.
 				}
@@ -219,7 +214,7 @@ public class FSM {
 		if (!object.isEmpty() && !subject.isEmpty()) {
 			triples.add(new Triple(object,FSM.IS_A,"football_team"));
 			triples.add(new Triple(object,FSM.IS_A,"organization"));
-			triples.add(new Triple(subject,pred,object));
+			triples.add(new Triple(subject,"played for",object));
 		}
 		
 		Map<String, Object> m = new HashMap<String, Object>();
@@ -350,6 +345,71 @@ public class FSM {
 		return triples;
 	}
 
+	public static Map<String, Object> findDebut(String subject, String[] words, String[] tags) {
+		// This FSM tries to find the "debut at/in"  pattern.
+				Vector<Triple> triples = new Vector<Triple>();
+				String object = "";
+				int state = 0;
+				int index = 0;
+				boolean found = false;	// flag for finding an object.
+				
+				while (index < words.length) {
+					switch (state) {
+					case 0:
+						if (words[index].matches("^[D|d]ebut($|ed$)")) {
+							state = 1;	// "debuted or debut"
+						} else {
+							state = 0;	// stay here.
+						}
+						break;
+					case 1:
+						if (words[index].equalsIgnoreCase("for")) {
+							state = 2;	// "for"
+						} else {
+							state = 1;	// stay here.
+						}
+						break;
+					case 2:
+						if (tags[index].matches("^NN.*")) {
+							// noun found
+							object = object.concat(words[index]);	// add word to object string.
+							found = true;
+							state = 3;	// go to 3.
+						} else if (tags[index].matches("^DT.*")) {	// if 
+							state = 2;	// stay here
+						} else {
+							state = 4;
+						}
+						break;
+					case 3:
+						if (tags[index].matches("^NN.*")) {
+							// noun
+							object = object.concat(" "+words[index]); // add word to object string
+							found = true;
+							state = 3;
+						} else {
+							state = 4;	// end state.
+						}
+						break;
+					case 4:	// end state
+						break;	
+					default:
+						break;
+					}
+				
+					index++;
+				}
+				
+				if (found || (index>=words.length && !object.isEmpty())) {
+					// add triple to vector
+					triples.add(new Triple(subject,"debuted for",object));
+				}
+				Map<String, Object> m = new HashMap<String, Object>();
+				m.put("mention",object);
+				m.put("triples",triples);
+				return m;
+	}
+	
 	public static Map<String, Object> findLivedIn(String subject, String[] words, String[] tags) {
 		// This FSM tries to find the "lived in"  pattern.
 				Vector<Triple> triples = new Vector<Triple>();
@@ -572,7 +632,7 @@ public class FSM {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				triples.add(new Triple(subject,"playedAs",object));
+				triples.add(new Triple(subject,"played as",object));
 				triples.add(new Triple(object,FSM.IS_A,"position"));
 				object= "";	// reset subject.
 				found = false;	// reset flag.
@@ -687,11 +747,9 @@ public class FSM {
 			// if found = true; store triple.
 			if (found || (index>=words.length && !object.isEmpty())) {
 				// add triple to vector
-				triples.add(new Triple(subject,FSM.SAME_AS,object));
+				triples.add(new Triple(subject,"known as",object));
 				object = "";	// reset object.
 				found = false;	// reset flag.
-				
-				System.out.println("triple.size() "+triples.size());
 			}
 		}
 		

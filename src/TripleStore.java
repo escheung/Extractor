@@ -56,7 +56,7 @@ public class TripleStore {
 		int sid = addEntity(s);
 		int pid = getPredicateByLiteral(p);
 		int oid = addEntity(o);
-		System.out.println(String.format("Adding triple:%s/%d %s/%d %s/%d", s,sid,p,pid,o,oid));
+		//System.out.println(String.format("Adding triple:%s/%d %s/%d %s/%d", s,sid,p,pid,o,oid));
 		this.addTriple(sid, pid, oid, origin);
 	}
 	
@@ -150,11 +150,14 @@ public class TripleStore {
 		assert(sanityCheck());
 		StringBuilder sb = new StringBuilder();
 		for (int i=0; i < this._Predicate.size(); i++) {
+			if (this._PredicateLiteral.get(this._Predicate.get(i)).equals(FSM.IS_A)) continue;	// skip "is-a" predicate
 			sb.append(String.format("%s\t%s\t%s\t%d\n", 
-					this.getEntityById(_Subject.get(i)), 
-					this.getPredicateById(_Predicate.get(i)),
-					this.getEntityById(_Object.get(i)),
-					_Origin.get(i)));
+					this.getEntityById(_Subject.get(i)), 	// get entity literal by id.
+					this.getPredicateById(this._PredicateMapTo.get(_Predicate.get(i))),	// get parent relation.
+					this.getEntityById(_Object.get(i)),		// get entity literal by id.
+					_Origin.get(i)
+				)
+			);
 		}
 		return sb.toString();
 	}
@@ -168,16 +171,25 @@ public class TripleStore {
 		uniqueMapTo.addAll(this._PredicateMapTo);	// unique ordered set of mapped to predicate 
 		
 		for (Integer mapId : uniqueMapTo) {
-		    System.out.println(String.format("Relationship: %s", this._PredicateLiteral.get(mapId)));
+			if (this._PredicateLiteral.get(mapId).equals(FSM.IS_A)) continue;	// skip "is-a" predicate
+		    
+			sb.append(String.format("***** Relationship: %s *****\n", this._PredicateLiteral.get(mapId)));
 			// find child predicates
 		    for (int i=0; i < _PredicateLiteral.size(); i++) {
 		    	if (this._PredicateMapTo.get(i) == mapId) {
 		    		Vector<Integer> origins = this.getListOfOrigin(i);
-		    		System.out.println(String.format("Pid:%d\tDesc:%s\tFreq:%d", i,this._PredicateDesc.get(i),origins.size()));
-		    		System.out.println(Arrays.toString(origins.toArray()));
+		    		if (origins.size()>0) {
+		    			sb.append(String.format("Pattern: %s\nDescription: %s\nFrequency: %d\n",
+		    					this._PredicateLiteral.get(i),
+		    					this._PredicateDesc.get(i),
+		    					origins.size()));
+		    			sb.append("Address:");
+		    			sb.append(Arrays.toString(origins.toArray()));
+		    			sb.append("\n-----\n");
+		    		}
 		    	}
-		    	
 		    }
+		    
 		}
 		
 		return sb.toString();

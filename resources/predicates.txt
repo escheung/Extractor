@@ -1,14 +1,17 @@
-isA	... is a ...	isA
-sameAs	assoicate two objects having the same meaning	sameAs
-knownAs	... is known as ...	sameAs
-played	played the sport of <object>	played
-playedPosition	associate a player to a field position they have taken	playedPosition
-playedAs	<player> ... as a ... <field position>	playedPosition
-playedInTeam	assocate a player to a team as a player	playedInTeam
-played for	... plays/played for ...	playedInTeam
-debuted for	... debuted for ...	playedInTeam
-founded by	<subject> founded by <object>	founded by
-lived in	<subject> lived in <object>	lived in
-started at	<subject> started at <organization>	playedInTeam
-played against	<player> played against <organization>	played against
-born in	<subject> born in <location>	born in
+is a	... is a ...	is a
+equal to	assoicate two objects having the same meaning	equal to
+known as	... is known as ...	equal to
+had role	associate an individual role	had role
+played as	... as a [role]>	had role
+played in team	assocate a player to a team as a player	played in team
+played for	... plays/played for ...	played in team
+debuted for	... debuted for ...	played in team
+started at	<subject> started at <organization>	played in team
+established	A organization was established by an entity.	established
+founded by	<subject> founded by <object>	established
+situated at	An individual was living at location	situated at
+lived in	<subject> lived in <object>	situated at
+adversary	player was the opponent of another player or organization	adversary
+played against	... played against	adversary
+birthplace	the individual was born at this location.	birthplace
+born in	<subject> born in <location>	birthplace

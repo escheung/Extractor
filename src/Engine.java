@@ -30,12 +30,7 @@ public class Engine {
 	private NameFinderME _nameFinderOrganization;
 
 	private TripleStore ts;
-/*	
-	public static String IS_A = "is_a";
-	public static String PERSON = "person";
-	public static String ORGANIZATION = "organization";
-	public static String LOCATION = "location";
-*/
+
 	public Engine (Map<String, InputStream> streams) throws Exception {	
 		this._sentenceDetector = new SentenceDetectorME(new SentenceModel(streams.get("model.sentence")));
 		this._tokenizer = new TokenizerME(new TokenizerModel(streams.get("model.token")));
@@ -50,11 +45,10 @@ public class Engine {
 		ts.addEntity(Triple.PERSON);
 		ts.addEntity(Triple.ORGANIZATION);
 		ts.addEntity(Triple.LOCATION);
-		//ts.addPredicate(Triple.IS_A);
 		parsePredicateFile(streams.get("input.predicates"));
 		
 		// print predicates
-		ts.printPredicates();
+		//ts.printPredicates();
 	}
 	public void parsePredicateFile(InputStream stream) throws Exception {
 		
@@ -63,8 +57,8 @@ public class Engine {
 		while ((line = br.readLine())!=null) {
 			
 			String[] pSlot = line.split("\\t");
-			System.out.println(Arrays.toString(pSlot));
-			System.out.println("---");
+//			System.out.println(Arrays.toString(pSlot));
+//			System.out.println("---");
 			ts.addPredicate(pSlot[0], pSlot[1], pSlot[2]);
 		}
 		
@@ -160,11 +154,17 @@ public class Engine {
 			// started at a club
 			map = FSM.findStartedAt(anchor, _token, _tag);
 			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// debuted for a club
+			map = FSM.findDebut(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
 			// Played against
 			map = FSM.findPlayedAgainst(anchor, _token, _tag);
 			ts.addTriples((Vector<Triple>)map.get("triples"), did);
 			// Born in
 			map = FSM.findBornIn(anchor, _token, _tag);
+			ts.addTriples((Vector<Triple>)map.get("triples"), did);
+			// Lived in
+			map = FSM.findLivedIn(anchor, _token, _tag);
 			ts.addTriples((Vector<Triple>)map.get("triples"), did);
 		}
 
@@ -295,16 +295,11 @@ public class Engine {
 		return "";
 	}
 	
-	public void printTriples() {
-		
-		System.out.print(ts.generateTriplesOutput());
+	public String getTriplesSummary() {
+		return (ts.generateTriplesOutput());
 	}
-	
-	public String getPredicateResult() {
-		
+	public String getPredicateSummary() {
 		return (ts.generatePredicateFrequency());
-		
-		
 	}
 }
 

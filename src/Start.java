@@ -124,8 +124,15 @@ public class Start {
 			doc_id++;	// Increment Doc index.
 		}
 		
-		engine.printTriples();
-		engine.getPredicateResult();
+		PrintWriter writer1 = new PrintWriter(_config.getProperty("file.out.relationships"),"UTF-8");
+		writer1.print(engine.getTriplesSummary());
+		writer1.close();
+		
+		PrintWriter writer2 = new PrintWriter(_config.getProperty("file.out.predicates"),"UTF-8");
+		writer2.print(engine.getPredicateSummary());
+		writer2.close();
+		
+		
 		
 /*		
 		// ############
