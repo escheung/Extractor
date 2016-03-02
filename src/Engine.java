@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
@@ -203,6 +205,14 @@ public class Engine {
 		return lines;
 	}
 */	
+	public Vector<String> getStuffInBrackets(String text) {
+		Vector<String> list = new Vector<String>();
+		Matcher m = Pattern.compile("\\((.*?)\\)").matcher(text);
+		while (m.find()) {
+			list.add(m.group(1));//Fetching Group from String
+		}
+		return list;
+	}
 	public String[] splitIntoSentences(String text) {
 		String[] sentences = _sentenceDetector.sentDetect(text);
 		return sentences;

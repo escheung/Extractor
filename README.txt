@@ -25,5 +25,5 @@ Using ANT:
 - from a terminal, go into the "Extractor" directory.
 - run "ant Start" to start execute the extraction application.
 - The outputs are stored in two files:
-    - "cmput690w16a1_cheung.tsv" for the primary objective.
-    - "cmput690w16a1_cheung_bonus.tsv" for the bonus objective.
+    - "cmput690w16a2_cheung.tsv" for the primary objective.
+    - "cmput690w16a2_cheung_bonus.tsv" for the bonus objective.
