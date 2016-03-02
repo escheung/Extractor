@@ -1,11 +1,11 @@
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
 public class FSM {
+	// FSM is a static class that implements Finite-State-Machine.
 	public static String IS_A = "is a";
-	//public static String SAME_AS = "sameAs";
 	
 	public static String delStuffBtwSingleQuote(String text) {
 		String line = text;
@@ -652,8 +652,6 @@ public class FSM {
 		int state = 0;	// state index.
 		int index = 0;	// word index in sentence.
 		boolean found = false;	// flag for finidng an object.
-//		if (subject == null) return triples;	// return empty triple vector;
-//		if (subject.isEmpty()) return triples;	// return empty triple vector;
 		
 		while (index < words.length) {
 			switch (state) {

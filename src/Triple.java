@@ -1,12 +1,10 @@
 
 public class Triple {
-
+	// A class used to contain a Triple.
 	private String _Subject;
 	private String _Object;
 	private String _Predicate;
 	
-//	public static String IS_A = "is a";
-//	public static String SAME_AS = "same as";
 	public static String PERSON = "person";
 	public static String ORGANIZATION = "organization";
 	public static String LOCATION = "location";

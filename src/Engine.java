@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Vector;
 
@@ -32,6 +31,7 @@ public class Engine {
 	private TripleStore ts;
 
 	public Engine (Map<String, InputStream> streams) throws Exception {	
+		// Constructor
 		this._sentenceDetector = new SentenceDetectorME(new SentenceModel(streams.get("model.sentence")));
 		this._tokenizer = new TokenizerME(new TokenizerModel(streams.get("model.token")));
 		this._tagger = new POSTaggerME(new POSModel(streams.get("model.pos")));
@@ -47,8 +47,6 @@ public class Engine {
 		ts.addEntity(Triple.LOCATION);
 		parsePredicateFile(streams.get("input.predicates"));
 		
-		// print predicates
-		//ts.printPredicates();
 	}
 	public void parsePredicateFile(InputStream stream) throws Exception {
 		
@@ -57,8 +55,6 @@ public class Engine {
 		while ((line = br.readLine())!=null) {
 			
 			String[] pSlot = line.split("\\t");
-//			System.out.println(Arrays.toString(pSlot));
-//			System.out.println("---");
 			ts.addPredicate(pSlot[0], pSlot[1], pSlot[2]);
 		}
 		
@@ -69,31 +65,24 @@ public class Engine {
 		docText = this.preprocess(docText);	// process document text.
 		String[] sentence = this.splitIntoSentences(docText);	// use model to split 
 		String anchorTerm = "";	//Anchor term for document; usually first noun found.
-//		int predicate_IS_A = ts.addPredicate("is_a"); 
 		for (int sid=0; sid < sentence.length; sid++) {	// for each sentence
 			
 			if (sentence[sid] == null) continue;	// skip if line is empty
 			if (sentence[sid].isEmpty()) continue;	// skip if line is empty
 			
 			String noCommas = this.delStuffBtwCommas(sentence[sid]);
-			//String noQuotes = this.delStuffBtwSingleQuote(sentence[sid]);
 			String noCommasQuotes = this.delStuffBtwSingleQuote(noCommas);
 			// Tokenize line
 			String[] token = this.tokenize(sentence[sid]);
-			// Apply POS tag
-			//String[] tag = this.tagging(token);
-			
 			
 			// Parse sentences
 			if (sid == 0) {
 				// Parse first sentence differently.
 				// Look for Anchor Term; and add triples to triple store.
-				
 				anchorTerm = parseFirstSentence(sentence[sid],docID);
 			};
 			
 			// Parse each sentences
-			
 			parseSentence(this.delStuffBtwSingleQuote(sentence[sid]), anchorTerm, docID);
 			
 			// Use NER classifier to find person, organization, and location.
@@ -105,6 +94,7 @@ public class Engine {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String parseFirstSentence(String sentence, int did) {
 		// parse first sentence; add triples to triple-store and return anchor terms.
 		String anchor = "";	// anchor term.

@@ -14,8 +14,6 @@ import opennlp.tools.tokenize.TokenizerModel;
 public class TestToken {
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-
 		
 		InputStream sentIO = TestToken.class.getResourceAsStream("en-sent.bin");
 		InputStream tokenIO = TestToken.class.getResourceAsStream("en-token.bin");
@@ -25,8 +23,7 @@ public class TestToken {
 		Tokenizer _tokenizer = new TokenizerME(new TokenizerModel(tokenIO));
 		POSTaggerME _tagger = new POSTaggerME(new POSModel(posIO));
 	
-		String text = "EstÃ¡dio Adelmar da Costa Carvalho, usually known as EstÃ¡dio Ilha do Retiro or simply Ilha do Retiro, is a sports stadium situated in Recife, in the Brazilian state of Pernambuco, owned by Sport Recife.\nThe stadium's official name is EstÃ¡dio Adelmar da Costa Carvalho, and it was inaugurated on July 4, 1937. The stadium's common name, Ilha do Retiro, is the name of the neighborhood where it is located. The stadium's official name, Adelmar da Costa Carvalho, is in honor of the Sport Recife president who presided over the first major renovation of the stadium. Blocks of high-rise flats border the ground giving the residents and visitors excellent views of the games in the stadium from their windows and balconies.";
-		
+		String text = "Papa Babacar 'Baba' Diawara (born 5 January 1988) is a Senegalese footballer who plays for Sevilla FC in Spain, as a striker.\nBorn in Dakar, Diawara started his career with Senegal Premier League club ASC Jeanne d'Arc, moving to Europe aged just 19 to sign for C.S. Marítimo, in Madeira, Portugal. Having risen to prominence in the club's B team, he made his first team debut in late 2007–08, appearing in the second half of a 1–1 home draw against C.F. Estrela da Amadora.\nPromoted to the main squad the following summer, Diawara scored 10 goals in the 2008–09 season, in 25 top flight games. His form attracted the attention of several clubs, including fellow league side Sporting Clube de Portugal, Greek team Olympiacos F.C. and Scotland's Heart of Midlothian, with the latter however being put off by Marítimo's £2.5 million (€2.75 million) valuation of the player.\nDiawara bettered his individual totals to 11 goals in 2010–11, with Marítimo finishing in 9th position. Scottish Premier League club Celtic came close to signing him in August 2011, but the deal collapsed on the last day of the transfer window due to visa issues.\nDiawara scored 10 goals in only 15 games in the first half of the";
 		String[] tokens = _tokenizer.tokenize(text);
 		String[] tags = _tagger.tag(tokens);
 		
